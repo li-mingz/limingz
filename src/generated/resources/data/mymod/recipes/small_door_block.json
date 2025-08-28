@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "tag": "forge:ingots/iron"
+    },
+    "x": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "pattern": [
+    "   ",
+    "axa",
+    "axa"
+  ],
+  "result": {
+    "item": "mymod:small_door_block"
+  },
+  "show_notification": true
+}

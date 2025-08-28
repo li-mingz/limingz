@@ -1,0 +1,8 @@
+{
+  "block.mymod.myblock": "我的方块",
+  "item.mymod.ticket": "票",
+  "block.mymod.small_door_block": "大门",
+  "block.mymod.desk_block": "展示台",
+  "block.mymod.demo_block": "3d测试",
+  "container.desk_block": "展示台"
+}

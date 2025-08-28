@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.limingz.mymod.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "SeaTrailGrownBlockMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

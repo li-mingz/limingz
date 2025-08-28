@@ -1,0 +1,30 @@
+[218月2025 00:08:27.106] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgedatauserdev, --assetIndex, 5, --assetsDir, C:\Users\l1733\.gradle\caches\forge_gradle\assets, --gameDir, ., --fml.forgeVersion, 47.4.6, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --mod, mymod, --all, --output, C:\Users\l1733\Desktop\mc开发\forge-1.20.1-47.4.6-mdk\src\generated\resources, --existing, C:\Users\l1733\Desktop\mc开发\forge-1.20.1-47.4.6-mdk\src\main\resources]
+[218月2025 00:08:27.117] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.8 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
+[218月2025 00:08:27.223] [main/WARN] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Configuration file C:\Users\l1733\Desktop\mc开发\forge-1.20.1-47.4.6-mdk\run-data\config\fml.toml is not correct. Correcting
+[218月2025 00:08:27.224] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowSkipGLVersions] was corrected from null to []
+[218月2025 00:08:27.224] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowLogHelpMessage] was corrected from null to true
+[218月2025 00:08:27.225] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowSquir] was corrected from null to false
+[218月2025 00:08:27.225] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowShowCPU] was corrected from null to false
+[218月2025 00:08:27.241] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgedatauserdev
+[218月2025 00:08:27.289] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/l1733/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23128!/ Service=ModLauncher Env=CLIENT
+[218月2025 00:08:27.519] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\l1733\.gradle\caches\modules-2\files-2.1\net.minecraftforge\javafmllanguage\1.20.1-47.4.6\9e86bf67e222253576e982856d9958695725adb5\javafmllanguage-1.20.1-47.4.6.jar is missing mods.toml file
+[218月2025 00:08:27.532] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\l1733\.gradle\caches\modules-2\files-2.1\net.minecraftforge\lowcodelanguage\1.20.1-47.4.6\56100545804adc991cc48ab68b86ba46c5873246\lowcodelanguage-1.20.1-47.4.6.jar is missing mods.toml file
+[218月2025 00:08:27.535] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\l1733\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mclanguage\1.20.1-47.4.6\fd228d7d879a9da774eda022ea3092cedb5178f1\mclanguage-1.20.1-47.4.6.jar is missing mods.toml file
+[218月2025 00:08:27.537] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\l1733\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlcore\1.20.1-47.4.6\cefc55ada370ce2f23f92834530eb967c0de1fdd\fmlcore-1.20.1-47.4.6.jar is missing mods.toml file
+[218月2025 00:08:27.592] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+[218月2025 00:08:28.768] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgedatauserdev' with arguments [--gameDir, ., --assetsDir, C:\Users\l1733\.gradle\caches\forge_gradle\assets, --assetIndex, 5, --mod, mymod, --all, --output, C:\Users\l1733\Desktop\mc开发\forge-1.20.1-47.4.6-mdk\src\generated\resources, --existing, C:\Users\l1733\Desktop\mc开发\forge-1.20.1-47.4.6-mdk\src\main\resources]
+[218月2025 00:08:29.100] [main/INFO] [net.minecraftforge.data.loading.DatagenModLoader/]: Initializing Data Gatherer for mods [mymod]
+[218月2025 00:08:32.315] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.6, for MC 1.20.1 with MCP 20230612.114412
+[218月2025 00:08:32.318] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: MinecraftForge v47.4.6 Initialized
+[218月2025 00:08:32.671] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/l1733/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.6_mapped_official_1.20.1/forge-1.20.1-47.4.6_mapped_official_1.20.1.jar%23191!/assets/.mcassetsroot' uses unexpected schema
+[218月2025 00:08:32.672] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/l1733/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.6_mapped_official_1.20.1/forge-1.20.1-47.4.6_mapped_official_1.20.1.jar%23191!/data/.mcassetsroot' uses unexpected schema
+[218月2025 00:08:32.889] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Tags for minecraft:block mod id mymod
+[218月2025 00:08:32.980] [main/INFO] [net.minecraft.data.DataGenerator/]: Tags for minecraft:block mod id mymod finished after 90 ms
+[218月2025 00:08:32.980] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Loot Tables
+[218月2025 00:08:33.015] [main/INFO] [net.minecraft.data.DataGenerator/]: Loot Tables finished after 34 ms
+[218月2025 00:08:33.015] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Recipes
+[218月2025 00:08:33.030] [main/INFO] [net.minecraft.data.DataGenerator/]: Recipes finished after 14 ms
+[218月2025 00:08:33.030] [main/INFO] [net.minecraft.data.DataGenerator/]: Starting provider: Global Loot Modifiers : mymod
+[218月2025 00:08:33.032] [main/INFO] [net.minecraft.data.DataGenerator/]: Global Loot Modifiers : mymod finished after 2 ms
+[218月2025 00:08:33.032] [main/INFO] [net.minecraft.data.DataGenerator/]: All providers took: 144 ms
+[218月2025 00:08:33.039] [main/INFO] [net.minecraft.data.HashCache/]: Caching: total files: 5, old count: 0, new count: 6, removed stale: 0, written: 5

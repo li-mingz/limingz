@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "mymod:block/myblock"
+      },
+      {
+        "model": "mymod:block/myblock",
+        "y": 90
+      },
+      {
+        "model": "mymod:block/myblock",
+        "y": 180
+      },
+      {
+        "model": "mymod:block/myblock",
+        "y": 270
+      }
+    ]
+  }
+}
