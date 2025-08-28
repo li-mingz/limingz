@@ -17,7 +17,6 @@ public class ForgeMinecraftServerEvent {
         if (!event.getLevel().isClientSide() && minecraftServer == null) { // 确保在服务端并且不重复加载
             minecraftServer = ((ServerLevel) event.getLevel()).getServer();
             SQLiteUtil.initSQLite();
-            System.out.println(SQLiteUtil.getConnection());
         }
     }
     @SubscribeEvent
