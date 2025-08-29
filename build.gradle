@@ -189,14 +189,18 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
     implementation("com.eliotlash.mclib:mclib:20")
-    implementation fg.deobf('local:caerula_arbor:0.8.7-forge-1.20.1')
+    implementation fg.deobf("local:caerula_arbor:${caerula_arbor_version}-forge-1.20.1")
     // 使用非Minecraft依赖
     // https://fg-doc-6x-zh-cn.readthedocs.io/zh-cn/latest/dependencies/
     minecraftLibrary 'org.xerial:sqlite-jdbc:3.50.3.0'
+    minecraftLibrary 'com.zaxxer:HikariCP:6.3.0'
     // 打包外部依赖进入jar
     // https://fg-doc-6x-zh-cn.readthedocs.io/zh-cn/latest/dependencies/jarinjar/
     jarJar(group: 'org.xerial', name: 'sqlite-jdbc', version: '[3.0,4.0)') {
         jarJar.pin(it, '3.50.3.0') // 显式固定版本
+    }
+    jarJar(group: 'com.zaxxer', name: 'HikariCP', version: '[5.0,7.0)') {
+        jarJar.pin(it, '6.3.0') // 显式固定版本
     }
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
@@ -217,6 +221,8 @@ tasks.named('processResources', ProcessResources).configure {
             loader_version_range: loader_version_range,
             mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
             mod_authors: mod_authors, mod_description: mod_description,
+            caerula_arbor_version: caerula_arbor_version,
+            caerula_arbor_version_range: caerula_arbor_version_range,
     ]
     inputs.properties replaceProperties
 
