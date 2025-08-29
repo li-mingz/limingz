@@ -66,9 +66,9 @@ public class SQLiteUtil {
             stmt.executeUpdate(
                     "CREATE TABLE IF NOT EXISTS block_pos (" +
                             "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "    x REAL NOT NULL," +
-                            "    y REAL NOT NULL," +
-                            "    z REAL NOT NULL," +
+                            "    x INT NOT NULL," +
+                            "    y INT NOT NULL," +
+                            "    z INT NOT NULL," +
                             "    name TEXT" +
                             ")"
             );
