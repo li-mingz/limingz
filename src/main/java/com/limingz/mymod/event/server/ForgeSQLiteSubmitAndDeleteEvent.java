@@ -23,10 +23,11 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
         if (event.phase == TickEvent.Phase.END) {
             tick++;
             if (tick % INTERVAL == 0) {
-                // 异步提交
-                new Thread(ForgeSQLiteSubmitAndDeleteEvent::submitToSQLite).start();
-                // 异步删除
-                new Thread(ForgeSQLiteSubmitAndDeleteEvent::deleteFromSQLite).start();
+                // 先删除，再插入
+                // 删除
+                deleteFromSQLite();
+                // 插入
+                submitToSQLite();
             }
         }
     }
@@ -34,6 +35,8 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
     public static void submitToSQLite() {
         // 队列为空则返回
         if (SQLiteTempData.sqliteAddQueue.isEmpty()) return;
+
+        long startTime = System.nanoTime();  // 记录开始时间
 
         try (Connection conn = SQLiteUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
@@ -64,6 +67,10 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
             pstmt.executeBatch(); // 提交剩余数据
             conn.commit();
 
+            long durationNanos = System.nanoTime() - startTime;
+            double durationMillis = durationNanos / 1_000_000.0;
+            System.out.printf("[SQLite] 插入操作耗时: %.2f ms%n", durationMillis);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -72,6 +79,8 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
     public static void deleteFromSQLite() {
         // 队列为空则返回
         if (SQLiteTempData.sqliteDeleteQueue.isEmpty()) return;
+
+        long startTime = System.nanoTime();  // 记录开始时间
 
         try (Connection conn = SQLiteUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
@@ -103,6 +112,10 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
             }
             pstmt.executeBatch();  // 提交剩余数据
             conn.commit();         // 提交事务
+
+            long durationNanos = System.nanoTime() - startTime;
+            double durationMillis = durationNanos / 1_000_000.0;
+            System.out.printf("[SQLite] 删除操作耗时: %.2f ms%n", durationMillis);
 
         } catch (SQLException e) {
             e.printStackTrace();
