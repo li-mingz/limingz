@@ -22,6 +22,10 @@ public class ForgeMinecraftServerEvent {
     @SubscribeEvent
     public static void getMinecraftServer(LevelEvent.Unload event) {
         if (!event.getLevel().isClientSide() && minecraftServer != null) { // 确保在服务端并且不重复加载
+            // 退出前保存数据
+            // 在主线程中更改数据库
+            ForgeSQLiteSubmitAndDeleteEvent.submitToSQLite();
+            ForgeSQLiteSubmitAndDeleteEvent.deleteFromSQLite();
             minecraftServer = null;
             SQLiteUtil.UnInitSQLite();
         }

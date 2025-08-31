@@ -15,7 +15,7 @@ import static com.limingz.mymod.Main.MODID;
 public class SQLiteUtil {
     private static HikariDataSource dataSource;
     // 相对于存档路径的位置
-    private static final String dbFilePathBySave = "db/user.db";
+    private static final String dbFilePathBySave = "user.db";
     private static String dbFilePath = null;
     // 是否初始化过
     private static Boolean isInitialized = false;
@@ -29,7 +29,7 @@ public class SQLiteUtil {
     public static Boolean initSQLite() {
         // 获取当前存档目录
         if (ForgeMinecraftServerEvent.getMinecraftServer() != null){
-            Path tempPath = ForgeMinecraftServerEvent.getMinecraftServer().getWorldPath(LevelResource.ROOT).resolve("data").resolve(MODID).normalize();
+            Path tempPath = ForgeMinecraftServerEvent.getMinecraftServer().getWorldPath(LevelResource.ROOT).resolve("data").resolve(MODID).resolve("db").normalize();
             try {
                 Files.createDirectories(tempPath);
             } catch (IOException e) {
@@ -37,6 +37,11 @@ public class SQLiteUtil {
             }
             dbFilePath = String.valueOf(tempPath.resolve(dbFilePathBySave).toAbsolutePath());
             isInitialized = true;
+            // 如果数据库不存在则创建数据库
+            try(Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbFilePath)){} catch (SQLException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
             HikariConfig config = getHikariConfig();
             dataSource = new HikariDataSource(config);
             createTable();
@@ -65,11 +70,12 @@ public class SQLiteUtil {
             // 建表（IF NOT EXISTS保障幂等性）
             stmt.executeUpdate(
                     "CREATE TABLE IF NOT EXISTS block_pos (" +
-                            "    id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            "    id INTEGER PRIMARY KEY," +
                             "    x INT NOT NULL," +
                             "    y INT NOT NULL," +
                             "    z INT NOT NULL," +
-                            "    name TEXT" +
+                            "    name TEXT," +
+                            "    UNIQUE(x, y, z, name)" +
                             ")"
             );
 
