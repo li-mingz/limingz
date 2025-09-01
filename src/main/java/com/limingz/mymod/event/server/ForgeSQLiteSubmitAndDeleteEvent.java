@@ -1,7 +1,7 @@
 package com.limingz.mymod.event.server;
 
-import com.limingz.mymod.util.SQLiteTempData;
-import com.limingz.mymod.util.SQLiteUtil;
+import com.limingz.mymod.util.sqlite.SQLiteTempData;
+import com.limingz.mymod.util.sqlite.SQLiteUtil;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

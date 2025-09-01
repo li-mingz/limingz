@@ -1,6 +1,6 @@
 package com.limingz.mymod.mixins;
 
-import com.limingz.mymod.util.SQLiteTempData;
+import com.limingz.mymod.util.sqlite.SQLiteTempData;
 import net.mcreator.caerulaarbor.procedures.ExpandTrailProcedure;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,12 +21,6 @@ public class ExpandTrailProcedureMixin {
             )
     )
     private static void execute(LevelAccessor world, double x, double y, double z, BlockState blockstate, CallbackInfo ci) {
-        // 服务端执行
-        if(!world.isClientSide()) {
-            SQLiteTempData.sqliteDeleteQueue.add((int)x);
-            SQLiteTempData.sqliteDeleteQueue.add((int)y);
-            SQLiteTempData.sqliteDeleteQueue.add((int)z);
-            SQLiteTempData.sqliteDeleteQueue.add(blockstate.getBlock().getDescriptionId());
-        }
+        SQLiteTempData.executeDelete(world, (int) x, (int) y, (int) z, blockstate);
     }
 }

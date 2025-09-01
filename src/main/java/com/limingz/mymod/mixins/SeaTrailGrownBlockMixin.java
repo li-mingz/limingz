@@ -1,6 +1,6 @@
 package com.limingz.mymod.mixins;
 
-import com.limingz.mymod.util.SQLiteTempData;
+import com.limingz.mymod.util.sqlite.SQLiteTempData;
 import net.mcreator.caerulaarbor.block.SeaTrailGrownBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -21,12 +21,6 @@ public abstract class SeaTrailGrownBlockMixin extends Block implements SimpleWat
     }
     @Inject(method = "onPlace", at = @At("HEAD"))
     public void onPlace(BlockState blockstate, Level world, BlockPos pos, BlockState oldState, boolean moving, CallbackInfo ci) {
-        // 服务端执行
-        if(!world.isClientSide) {
-            SQLiteTempData.sqliteAddQueue.add(pos.getX());
-            SQLiteTempData.sqliteAddQueue.add(pos.getY());
-            SQLiteTempData.sqliteAddQueue.add(pos.getZ());
-            SQLiteTempData.sqliteAddQueue.add(this.getDescriptionId());
-        }
+        SQLiteTempData.executeAdd(world, pos, this);
     }
 }

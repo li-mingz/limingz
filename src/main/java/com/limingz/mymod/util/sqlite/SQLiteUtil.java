@@ -1,4 +1,4 @@
-package com.limingz.mymod.util;
+package com.limingz.mymod.util.sqlite;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -78,23 +78,6 @@ public class SQLiteUtil {
                             "    UNIQUE(x, y, z, name)" +
                             ")"
             );
-
-            // 检查索引是否存在
-            ResultSet rs = conn.getMetaData().getIndexInfo(null, null, "block_pos", false, false);
-            boolean indexExists = false;
-            while (rs.next()) {
-                if ("pos_index".equals(rs.getString("INDEX_NAME"))) {
-                    indexExists = true;
-                    break;
-                }
-            }
-
-            // 仅当索引不存在时创建
-            if (!indexExists) {
-                stmt.executeUpdate(
-                        "CREATE INDEX pos_index ON block_pos(x, y, z, name)"
-                );
-            }
         } catch (SQLException e) {
             throw new RuntimeException("初始化失败", e);
         }

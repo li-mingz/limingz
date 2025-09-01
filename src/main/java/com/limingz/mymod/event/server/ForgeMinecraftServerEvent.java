@@ -1,6 +1,6 @@
 package com.limingz.mymod.event.server;
 
-import com.limingz.mymod.util.SQLiteUtil;
+import com.limingz.mymod.util.sqlite.SQLiteUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.level.LevelEvent;
