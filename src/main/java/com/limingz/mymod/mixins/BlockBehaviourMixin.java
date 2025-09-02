@@ -27,6 +27,8 @@ public abstract class BlockBehaviourMixin implements FeatureElement {
                     block instanceof SeaTrailSolidBlock||
                     block instanceof TrailLogBlock||
                     block instanceof TrailLeaveBlock||
+                    block instanceof OceanOvaryBlock||
+                    block instanceof RedOvaryBlock||
                     block instanceof TrailMushroomBlock) {
                 SQLiteTempData.executeAdd(world, pos, block);
             }
@@ -43,6 +45,8 @@ public abstract class BlockBehaviourMixin implements FeatureElement {
                     block instanceof SeaTrailSolidBlock||
                     block instanceof TrailLogBlock||
                     block instanceof TrailLeaveBlock||
+                    block instanceof OceanOvaryBlock||
+                    block instanceof RedOvaryBlock||
                     block instanceof TrailMushroomBlock) {
                 SQLiteTempData.executeDelete(world, pos, block);
             }

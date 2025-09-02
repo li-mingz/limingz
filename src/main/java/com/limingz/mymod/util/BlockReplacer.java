@@ -45,6 +45,8 @@ public class BlockReplacer {
                     block==CaerulaArborModBlocks.SEA_TRAIL_INIT.get()||
                     block==CaerulaArborModBlocks.SEA_TRAIL_GROWING.get()||
                     block==CaerulaArborModBlocks.SEA_TRAIL_STOP.get()||
+                    block==CaerulaArborModBlocks.OCEAN_OVARY.get()||
+                    block==CaerulaArborModBlocks.RED_OVARY.get()||
                     block==CaerulaArborModBlocks.TRAIL_MUSHROOM.get()){
                 serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
             }else if (block==CaerulaArborModBlocks.SEA_TRAIL_SOLID.get()){
