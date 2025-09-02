@@ -19,6 +19,8 @@ public class SQLiteTempData {
             sqliteAddQueue.add(pos.getY());
             sqliteAddQueue.add(pos.getZ());
             sqliteAddQueue.add(block.getDescriptionId());
+            sqliteAddQueue.add(pos.getX()>>4);
+            sqliteAddQueue.add(pos.getY()>>4);
         }
     }
 
@@ -29,6 +31,8 @@ public class SQLiteTempData {
             sqliteDeleteQueue.add(y);
             sqliteDeleteQueue.add(z);
             sqliteDeleteQueue.add(blockstate.getBlock().getDescriptionId());
+            sqliteDeleteQueue.add(x>>4);
+            sqliteDeleteQueue.add(y>>4);
         }
     }
 }

@@ -2,7 +2,7 @@ package com.limingz.mymod.event.server;
 
 import com.limingz.mymod.util.sqlite.SQLiteTempData;
 import com.limingz.mymod.util.sqlite.SQLiteUtil;
-import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -14,22 +14,16 @@ import static com.limingz.mymod.Main.MODID;
 
 @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeSQLiteSubmitAndDeleteEvent {
-    private final static int INTERVAL = 30 * 20; // 30秒（600刻）
-    private static int tick = 0;
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        // 仅处理END阶段，避免重复计数
-        if (event.phase == TickEvent.Phase.END) {
-            tick++;
-            if (tick % INTERVAL == 0) {
-                // 先删除，再插入
-                // 删除
-                deleteFromSQLite();
-                // 插入
-                submitToSQLite();
-            }
-        }
+    public static void onServerSave(LevelEvent.Save event) {
+        // 仅在服务端保存
+        if (event.getLevel().isClientSide()) return;
+        // 先删除，再插入
+        // 删除
+        deleteFromSQLite();
+        // 插入
+        submitToSQLite();
     }
 
     public static void submitToSQLite() {
@@ -40,7 +34,7 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
 
         try (Connection conn = SQLiteUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
-                     "INSERT OR IGNORE INTO block_pos (x, y, z, name) VALUES (?,?,?,?)")) {
+                     "INSERT OR IGNORE INTO block_pos (x, y, z, name, chunk_x, chunk_y) VALUES (?,?,?,?,?,?)")) {
 
             conn.setAutoCommit(false);
             int batchSize = 0;
@@ -51,13 +45,17 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
                 Object y = SQLiteTempData.sqliteAddQueue.poll();
                 Object z = SQLiteTempData.sqliteAddQueue.poll();
                 Object name = SQLiteTempData.sqliteAddQueue.poll();
+                Object chunk_x = SQLiteTempData.sqliteAddQueue.poll();
+                Object chunk_y = SQLiteTempData.sqliteAddQueue.poll();
 
-                if (x == null || y == null || z == null || name == null) break;
+                if (x == null || y == null || z == null || name == null || chunk_x == null || chunk_y == null) break;
 
                 pstmt.setInt(1, (Integer) x);
                 pstmt.setInt(2, (Integer) y);
                 pstmt.setInt(3, (Integer) z);
                 pstmt.setString(4, (String) name);
+                pstmt.setInt(5, (Integer) chunk_x);
+                pstmt.setInt(6, (Integer) chunk_y);
                 pstmt.addBatch(); // 批量
                 batchSize++;
 
@@ -84,7 +82,7 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
 
         try (Connection conn = SQLiteUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
-                     "DELETE FROM block_pos WHERE x=? AND y=? AND z=? AND name=?")) {
+                     "DELETE FROM block_pos WHERE x=? AND y=? AND z=? AND name=? AND chunk_x=? AND chunk_y=?")) {
 
             conn.setAutoCommit(false);  // 关闭自动提交
             int batchSize = 0;
@@ -94,14 +92,18 @@ public class ForgeSQLiteSubmitAndDeleteEvent {
                 Object y = SQLiteTempData.sqliteDeleteQueue.poll();
                 Object z = SQLiteTempData.sqliteDeleteQueue.poll();
                 Object name = SQLiteTempData.sqliteDeleteQueue.poll();
+                Object chunk_x = SQLiteTempData.sqliteDeleteQueue.poll();
+                Object chunk_y = SQLiteTempData.sqliteDeleteQueue.poll();
 
-                if (x == null || y == null || z == null || name == null) break;
+                if (x == null || y == null || z == null || name == null || chunk_x == null || chunk_y == null) break;
 
                 // 绑定删除条件
                 pstmt.setInt(1, (Integer) x);
                 pstmt.setInt(2, (Integer) y);
                 pstmt.setInt(3, (Integer) z);
                 pstmt.setString(4, (String) name);
+                pstmt.setInt(5, (Integer) chunk_x);
+                pstmt.setInt(6, (Integer) chunk_y);
                 pstmt.addBatch();  // 加入批量操作
                 batchSize++;
 

@@ -75,7 +75,9 @@ public class SQLiteUtil {
                             "    y INT NOT NULL," +
                             "    z INT NOT NULL," +
                             "    name TEXT," +
-                            "    UNIQUE(x, y, z, name)" +
+                            "    chunk_x INT NOT NULL," +
+                            "    chunk_y INT NOT NULL," +
+                            "    UNIQUE(x, y, z, name, chunk_x, chunk_y)" +
                             ")"
             );
         } catch (SQLException e) {

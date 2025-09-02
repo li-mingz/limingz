@@ -34,7 +34,9 @@ public class SQLiteBatchTraversal {
                         int y = rs.getInt("y");
                         int z = rs.getInt("z");
                         String name = rs.getString("name");
-                        processData(id, x, y, z, name); // 数据处理
+                        int chunk_x = rs.getInt("chunk_x");
+                        int chunk_y = rs.getInt("chunk_y");
+                        processData(id, x, y, z, name,chunk_x,chunk_y); // 数据处理
                         count++;
                         lastMaxId = id;  // 更新为当前最大ID
                     }
@@ -55,7 +57,7 @@ public class SQLiteBatchTraversal {
     }
 
     // 数据处理
-    private static void processData(long id, int x, int y, int z, String name) {
-        System.out.println("[SQLite] 遍历: ID=" + id + ", X=" + x + ", Y=" + y + ", Z=" + z + ", Name=" + name);
+    private static void processData(long id, int x, int y, int z, String name, int chunk_x, int chunk_y) {
+        System.out.println("[SQLite] 遍历: ID=" + id + ", X=" + x + ", Y=" + y + ", Z=" + z + ", Name=" + name + ", Chunk_X=" + chunk_x + ", Chunk_Y=" + chunk_y);
     }
 }
