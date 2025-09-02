@@ -50,6 +50,18 @@ public class SQLiteUtil {
         return false;
     }
 
+    public static void clearSQLite(){
+        try (Connection conn = SQLiteUtil.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // 执行DELETE命令清空表
+            String sql = "DELETE FROM block_pos";
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            System.err.println("数据库错误: " + e.getMessage());
+        }
+    }
+
     private static HikariConfig getHikariConfig() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:sqlite:" + dbFilePath); // 文件路径

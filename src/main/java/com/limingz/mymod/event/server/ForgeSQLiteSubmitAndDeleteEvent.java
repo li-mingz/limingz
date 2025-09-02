@@ -4,15 +4,11 @@ import com.limingz.mymod.util.sqlite.SQLiteTempData;
 import com.limingz.mymod.util.sqlite.SQLiteUtil;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static com.limingz.mymod.Main.MODID;
-
-@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeSQLiteSubmitAndDeleteEvent {
 
     @SubscribeEvent
