@@ -78,8 +78,10 @@ public class SQLiteUtil {
                             "    chunk_x INT NOT NULL," +
                             "    chunk_y INT NOT NULL," +
                             "    UNIQUE(x, y, z, name, chunk_x, chunk_y)" +
-                            ")"
+                            ");"
             );
+            // 建立索引
+            stmt.executeUpdate("CREATE INDEX IF NOT EXISTS chunk_index ON block_pos(chunk_x ASC, chunk_y ASC);");
         } catch (SQLException e) {
             throw new RuntimeException("初始化失败", e);
         }
