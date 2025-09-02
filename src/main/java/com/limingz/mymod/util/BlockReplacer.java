@@ -38,10 +38,23 @@ public class BlockReplacer {
             chunk_set.remove(long_lastLoadedChunk);
         }
         BlockPos blockPos = new BlockPos(x, y, z);
+        Block block = serverLevel.getBlockState(blockPos).getBlock();
         // 检测该位置方块是否正确
-        if(serverLevel.getBlockState(blockPos).getBlock().getDescriptionId().equals(name)){
-            serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-            System.out.println("[SQLite] 有效遍历: X=" + x + ", Y=" + y + ", Z=" + z + ", Name=" + name + ", Chunk_X=" + chunk_x + ", Chunk_Y=" + chunk_y);
+        if(block.getDescriptionId().equals(name)){
+            if(block==CaerulaArborModBlocks.SEA_TRAIL_GROWN.get()||
+                    block==CaerulaArborModBlocks.SEA_TRAIL_INIT.get()||
+                    block==CaerulaArborModBlocks.SEA_TRAIL_GROWING.get()||
+                    block==CaerulaArborModBlocks.SEA_TRAIL_STOP.get()||
+                    block==CaerulaArborModBlocks.TRAIL_MUSHROOM.get()){
+                serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            }else if (block==CaerulaArborModBlocks.SEA_TRAIL_SOLID.get()){
+                serverLevel.setBlock(blockPos, Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+            }else if (block==CaerulaArborModBlocks.TRAIL_LOG.get()){
+                serverLevel.setBlock(blockPos, Blocks.OAK_LOG.defaultBlockState(), Block.UPDATE_ALL);
+            }else if (block==CaerulaArborModBlocks.TRAIL_LEAVE.get()){
+                serverLevel.setBlock(blockPos, Blocks.OAK_LEAVES.defaultBlockState(), Block.UPDATE_ALL);
+            }
+//            System.out.println("[SQLite] 有效遍历: X=" + x + ", Y=" + y + ", Z=" + z + ", Name=" + name + ", Chunk_X=" + chunk_x + ", Chunk_Y=" + chunk_y);
         }
 
     }

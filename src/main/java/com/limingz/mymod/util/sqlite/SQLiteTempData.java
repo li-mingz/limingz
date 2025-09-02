@@ -24,15 +24,15 @@ public class SQLiteTempData {
         }
     }
 
-    public static void executeDelete(LevelAccessor world, int x, int y, int z, BlockState blockstate) {
+    public static void executeDelete(Level world, BlockPos pos, Block block) {
         // 服务端执行
         if(!world.isClientSide()) {
-            sqliteDeleteQueue.add(x);
-            sqliteDeleteQueue.add(y);
-            sqliteDeleteQueue.add(z);
-            sqliteDeleteQueue.add(blockstate.getBlock().getDescriptionId());
-            sqliteDeleteQueue.add(x>>4);
-            sqliteDeleteQueue.add(y>>4);
+            sqliteDeleteQueue.add(pos.getX());
+            sqliteDeleteQueue.add(pos.getY());
+            sqliteDeleteQueue.add(pos.getZ());
+            sqliteDeleteQueue.add(block.getDescriptionId());
+            sqliteDeleteQueue.add(pos.getX()>>4);
+            sqliteDeleteQueue.add(pos.getY()>>4);
         }
     }
 }
