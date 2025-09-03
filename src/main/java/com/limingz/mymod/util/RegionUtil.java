@@ -7,6 +7,7 @@ import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -74,8 +75,8 @@ public class RegionUtil {
                             // 确保没有重复
                             if(!new_palette.contains(compoundTag)){
                                 new_palette.add(compoundTag);
-                                temp_index.put(compoundTag, new_palette.size());
-                                new_index.put(i, new_palette.size());
+                                temp_index.put(compoundTag, new_palette.size()-1);
+                                new_index.put(i, new_palette.size()-1);
                             } else {
                                 // 重复则添加重复的索引
                                 new_index.put(i, temp_index.get(compoundTag));
@@ -102,8 +103,8 @@ public class RegionUtil {
                         // 确保没有重复
                         if(!new_palette.contains(newBlock)){
                             new_palette.add(newBlock);
-                            temp_index.put(newBlock, new_palette.size());
-                            new_index.put(i, new_palette.size());
+                            temp_index.put(newBlock, new_palette.size()-1);
+                            new_index.put(i, new_palette.size()-1);
                         } else {
                             // 重复则添加重复的索引
                             new_index.put(i, temp_index.get(newBlock));
@@ -131,14 +132,10 @@ public class RegionUtil {
                         continue;
                     }
                     // 索引开始变动的最小索引
-                    AtomicInteger min_change_index = new AtomicInteger(-1);
-                    new_index.forEach((key, value) -> {
-                        if(!key.equals(value)){
-                            if (min_change_index.get() < 0){
-                                min_change_index.set(Math.min(key, value));
-                            } else {
-                                min_change_index.set(Math.min(Math.min(key, value), min_change_index.get()));
-                            }
+                    AtomicInteger min_change_index = new AtomicInteger(Integer.MAX_VALUE);
+                    new_index.forEach((oldIdx, newIdx) -> {
+                        if (!oldIdx.equals(newIdx)) { // 仅当索引变化时
+                            min_change_index.set(Math.min(min_change_index.get(),Math.min(oldIdx, newIdx)));
                         }
                     });
 
@@ -147,8 +144,10 @@ public class RegionUtil {
                     int new_b = Math.max(log2(new_palette.size()), 4);
                     // 计算一个长整数（64位整数）能存储多少个元素
                     int old_u = 64/old_b;
+                    int new_u = 64/new_b;
                     // 计算位掩码
                     long old_mask = (1L << old_b) - 1L;
+                    long new_mask = (1L << new_b) - 1L;
                     // 如果修改后的调色板存储位数无需变动
                     if(old_b == new_b){
                         // 只需修改索引
@@ -159,8 +158,29 @@ public class RegionUtil {
                                 setPalette(data, i, old_b, old_u, old_mask, new_index.get(l));
                             }
                         }
-                    }
+                        blockStates.putLongArray("data", data); // 更新数据
+                    // 如果修改后的调色板存储位数需要变动, 则重新构造数据
+                    } else {
+                        // 计算新数组长度
+                        int newLength = (int) Math.ceil(4096.0 / new_u);
+                        long[] newData = new long[newLength];
+                        long newMask = (1L << new_b) - 1L;
+                        int newU = 64 / new_b;
 
+                        for (int i = 0; i < 4096; i++) {
+                            long oldIndex = getPalette(data, i, old_b, old_u, old_mask);
+                            int newIndex = new_index.get((int) oldIndex);
+                            setPalette(newData, i, new_b, newU, newMask, newIndex);
+                        }
+                        blockStates.putLongArray("data", newData); // 更新数据
+                    }
+                    blockStates.put("palette", new_palette);  // 更新调色板
+                    section.put("block_states", blockStates); // 更新section
+                    sections.set(sections_i, section); // 更新sections
+                    need_write = true;
+                }
+                if (need_write){
+                    NbtIo.write(nbt, (DataOutput) dis);
                 }
             }
             long durationNanos = System.nanoTime() - startTime;
