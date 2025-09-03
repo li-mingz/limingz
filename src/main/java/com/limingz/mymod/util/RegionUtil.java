@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RegionUtil {
     // 获取世界存储目录
@@ -118,9 +119,10 @@ public class RegionUtil {
                         need_write = true;
                         continue;
                     };
+
                     // 是否需要使用新索引
                     // 检测新调色板大小是否有变动（只可能会更小，不会更大）
-                    if(palette.size() != new_palette.size()){
+                    if(palette.size() == new_palette.size()){
                         // 不需要使用新索引,只需更改调色板
                         blockStates.put("palette", new_palette);  // 更新调色板
                         section.put("block_states", blockStates); // 更新section
@@ -128,7 +130,17 @@ public class RegionUtil {
                         need_write = true;
                         continue;
                     }
-
+                    // 索引开始变动的最小索引
+                    AtomicInteger min_change_index = new AtomicInteger(-1);
+                    new_index.forEach((key, value) -> {
+                        if(!key.equals(value)){
+                            if (min_change_index.get() < 0){
+                                min_change_index.set(Math.min(key, value));
+                            } else {
+                                min_change_index.set(Math.min(Math.min(key, value), min_change_index.get()));
+                            }
+                        }
+                    });
 
                     // 计算存储位数
                     int old_b = Math.max(log2(palette.size()), 4);
@@ -142,10 +154,9 @@ public class RegionUtil {
                         // 只需修改索引
                         for(int i=0;i<4096;i++){
                             int l = (int)getPalette(data, i, old_b, old_u, old_mask);
-                            String paletteName = paletteNames[l];
-                            // 当遍历到有目标方块的坐标时
-                            if(paletteName != null){
-
+                            // 仅修改变动的索引
+                            if(l >= min_change_index.get()){
+                                setPalette(data, i, old_b, old_u, old_mask, new_index.get(l));
                             }
                         }
                     }
@@ -162,6 +173,13 @@ public class RegionUtil {
     // 使用序号i，读取存储位数为b（长整数能存储元素的数量为u）调色板数据
     private static long getPalette(long[] data, int i, int b, int u, long mask) {
         return (data[i / u] >> ((i % u) * b)) & mask;
+    }
+    private static void setPalette(long[] data, int i, int b, int u, long mask, long value) {
+        int index = i / u;           // 计算数据在数组中的位置
+        int off = (i % u) * b;       // 计算元素在长整数内的位偏移
+        long clearMask = ~(mask << off); // 创建用于清除目标位的掩码
+        // 先清除目标位，然后设置新的值
+        data[index] = (data[index] & clearMask) | ((value & mask) << off);
     }
     private static int log2(int x) {
         return 32 - Integer.numberOfLeadingZeros(x - 1);
