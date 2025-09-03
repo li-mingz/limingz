@@ -1,5 +1,6 @@
 package com.limingz.mymod.event.server;
 
+import com.limingz.mymod.util.RegionUtil;
 import com.limingz.mymod.util.sqlite.SQLiteUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -17,6 +18,7 @@ public class ForgeMinecraftServerEvent {
         if (minecraftServer == null) { // 确保不重复加载
             minecraftServer = event.getServer();
             SQLiteUtil.initSQLite();
+            RegionUtil.main();
         }
     }
     @SubscribeEvent
