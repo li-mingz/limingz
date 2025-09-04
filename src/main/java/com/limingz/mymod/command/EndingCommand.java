@@ -1,5 +1,6 @@
 package com.limingz.mymod.command;
 
+import com.limingz.mymod.util.BlockReplaceInLoadingChunk;
 import com.limingz.mymod.util.RegionUtil;
 import com.limingz.mymod.util.sqlite.SQLiteBatchTraversal;
 import com.mojang.brigadier.CommandDispatcher;
@@ -28,6 +29,7 @@ public class EndingCommand {
                     () -> Component.literal(String.format("[%s] [调试] [4结局事件] 开始替换方块", MODID)),
                 false // 是否广播到日志
             );
+            BlockReplaceInLoadingChunk.replaceBlock();
             context.getSource().sendSuccess(
                     () -> Component.literal(RegionUtil.traversalAllRegionFiles()),
                     false // 是否广播到日志

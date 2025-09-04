@@ -1,6 +1,5 @@
 package com.limingz.mymod.event.server;
 
-import com.limingz.mymod.util.RegionUtil;
 import com.limingz.mymod.util.sqlite.SQLiteUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.server.ServerStartingEvent;

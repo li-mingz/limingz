@@ -1,12 +1,18 @@
 package com.limingz.mymod.util;
 
 import com.limingz.mymod.event.server.ForgeMinecraftServerEvent;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.storage.LevelResource;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +49,7 @@ public class RegionUtil {
         long durationNanos = System.nanoTime() - startTime;
         double durationMillis = durationNanos / 1_000_000.0;
         System.out.printf("[mymod] 遍历区域文件操作耗时: %.2f ms%n", durationMillis);
-        return String.format("[%s] [调试] [4结局事件] 共遍历 %,d 个区块，写入 %,d 个区块，耗时: %.2f ms", MODID, traversalChunkCount, writeChunkCount, durationMillis);
+        return String.format("[%s] [调试] [4结局事件] 在文件中共遍历 %,d 个区块，写入 %,d 个区块，耗时: %.2f ms", MODID, traversalChunkCount, writeChunkCount, durationMillis);
     }
     /*
      * 遍历指定区域内文件的所有有效区块
@@ -206,6 +212,14 @@ public class RegionUtil {
                     }
                 }
                 if (need_write){
+
+                    // 移除高度图数据
+                    if (nbt.contains("Heightmaps")) {
+                        nbt.remove("Heightmaps");
+                    }
+
+                    // 标记光照未初始化
+                    nbt.putBoolean("LightPopulated", false);
                     try (DataOutputStream dos = region.getChunkDataOutputStream(chunkPos)) {
                         NbtIo.write(nbt, dos);
                     }
