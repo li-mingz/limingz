@@ -44,6 +44,8 @@ public class BlockReplaceInLoadingChunk {
             // 跳过未完全生成的区块
             if (!(chunkAccess instanceof LevelChunk)) return;
             LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
+            // 是否需要更新该区块
+            Boolean needUpdate = false;
             // 遍历子区块
             for (int i=0;i<levelChunkSections.length;i++){
                 LevelChunkSection section = levelChunkSections[i];
@@ -83,15 +85,17 @@ public class BlockReplaceInLoadingChunk {
                             }
                         }
                     }
-
-                    ((LevelChunk)chunkAccess).setLightCorrect(false);    // 标记高度图需重新计算
-                    chunkAccess.setUnsaved(true);
-                    // 向玩家发送区块更新
-                    updatePlayersForChunk(serverLevel, (LevelChunk)chunkAccess, chunkAccess.getPos());
-                    writeChunkCount++;
+                    needUpdate = true;
                 }
-                traversalChunkCount++;
             }
+            if(needUpdate){
+                chunkAccess.setLightCorrect(false);    // 标记高度图需重新计算
+                chunkAccess.setUnsaved(true);
+                // 向玩家发送区块更新
+                updatePlayersForChunk(serverLevel, (LevelChunk)chunkAccess, chunkAccess.getPos());
+                writeChunkCount++;
+            }
+            traversalChunkCount++;
         });
         long durationNanos = System.nanoTime() - startTime;
         double durationMillis = durationNanos / 1_000_000.0;
