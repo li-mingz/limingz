@@ -18,7 +18,6 @@ public class ForgeMinecraftServerEvent {
         if (minecraftServer == null) { // 确保不重复加载
             minecraftServer = event.getServer();
             SQLiteUtil.initSQLite();
-            RegionUtil.main();
         }
     }
     @SubscribeEvent
