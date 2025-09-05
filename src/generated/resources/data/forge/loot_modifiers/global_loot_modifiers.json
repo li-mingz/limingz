@@ -1,4 +1,6 @@
 {
-  "entries": [],
+  "entries": [
+    "mymod:crops_modifier"
+  ],
   "replace": false
 }

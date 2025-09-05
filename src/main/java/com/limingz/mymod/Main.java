@@ -9,6 +9,7 @@ import com.limingz.mymod.capability.farmxp.PlayerFarmXpProvider;
 import com.limingz.mymod.config.CommonConfig;
 import com.limingz.mymod.gui.container.DeskBlockContainerMenu;
 import com.limingz.mymod.item.TicketItem;
+import com.limingz.mymod.register.LootModifierRegister;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.registries.Registries;
@@ -100,6 +101,8 @@ public class Main {
         CREATIVE_MODE_TABS.register(modEventBus);
         GLOBAL_LOOT_MODIFIER.register(modEventBus);
         MENU_TYPE.register(modEventBus);
+        // 注册战利品修改器
+        LootModifierRegister.LOOT_MODIFIERS.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
