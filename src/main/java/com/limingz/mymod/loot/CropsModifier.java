@@ -4,6 +4,7 @@ import com.limingz.mymod.datagen.GlobalLootModifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,7 +35,13 @@ public class CropsModifier extends LootModifier {
         // 没有则直接返回
         if (originVector == null || blockState == null) return generatedLoot;
         for(ItemStack itemStack : generatedLoot){
-
+            // 获取物品的食物属性
+            FoodProperties foodProperties = itemStack.getItem().getFoodProperties(itemStack, null);
+            // 非 null 表示可食用
+            if(foodProperties != null){
+                foodProperties.getNutrition(); // 饱食度
+                foodProperties.getSaturationModifier(); // 饱和度
+            }
         }
         // 计算区块坐标
         int chunkX = ((int) Math.floor(originVector.x)) >> 4;
