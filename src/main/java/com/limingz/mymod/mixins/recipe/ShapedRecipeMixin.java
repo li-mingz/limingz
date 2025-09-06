@@ -37,9 +37,9 @@ public abstract class ShapedRecipeMixin {
             }
 
         }
-        ItemStack result_itemstack = this.getResultItem(pRegistryAccess).copy();
         // 如果存在营养值
         if(nutritious_value > 0){
+            ItemStack result_itemstack = this.getResultItem(pRegistryAccess).copy();
             // 平分产物营养值
             nutritious_value = nutritious_value / result_itemstack.getCount();
             CompoundTag tag = result_itemstack.getOrCreateTag();

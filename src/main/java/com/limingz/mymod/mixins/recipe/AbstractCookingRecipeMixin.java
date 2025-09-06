@@ -28,28 +28,27 @@ public class AbstractCookingRecipeMixin {
     public void assemble(Container pContainer, RegistryAccess pRegistryAccess, CallbackInfoReturnable<ItemStack> cir) {
         // 熔炉配方只有一个输入
         ItemStack temp_itemStack = pContainer.getItem(0);
-        float nutritious_value = 0;
         // 检查是否存在自定义标签
         if (CropsModifier.isNutritious(temp_itemStack)){
             // 获取额外营养值
-            nutritious_value = temp_itemStack.getTag().getFloat(CropsModifier.TAG_NUTRITIOUS);
-        }
-        ItemStack result_itemstack = this.result.copy();
-        // 如果存在营养值
-        if(nutritious_value > 0){
-            // 平分产物营养值
-            nutritious_value = nutritious_value / result_itemstack.getCount();
-            CompoundTag tag = result_itemstack.getOrCreateTag();
-            // 设置营养值
-            tag.putFloat(CropsModifier.TAG_NUTRITIOUS, nutritious_value);
-            // 更改物品名称
-            MutableComponent oldName = result_itemstack.getHoverName().copy();
-            Style oldStyle = oldName.getStyle();
-            if(oldStyle.isEmpty()) oldStyle = oldStyle.applyFormats(ChatFormatting.WHITE);
-            MutableComponent newName = Component.literal("富营养的 ").withStyle(ChatFormatting.GREEN)
-                    .append(oldName.withStyle(oldStyle));
-            result_itemstack.setHoverName(newName);
-            cir.setReturnValue(result_itemstack);
+            float nutritious_value = temp_itemStack.getTag().getFloat(CropsModifier.TAG_NUTRITIOUS);
+            ItemStack result_itemstack = this.result.copy();
+            // 如果营养值数值正常
+            if(nutritious_value > 0){
+                // 平分产物营养值
+                nutritious_value = nutritious_value / result_itemstack.getCount();
+                CompoundTag tag = result_itemstack.getOrCreateTag();
+                // 设置营养值
+                tag.putFloat(CropsModifier.TAG_NUTRITIOUS, nutritious_value);
+                // 更改物品名称
+                MutableComponent oldName = result_itemstack.getHoverName().copy();
+                Style oldStyle = oldName.getStyle();
+                if(oldStyle.isEmpty()) oldStyle = oldStyle.applyFormats(ChatFormatting.WHITE);
+                MutableComponent newName = Component.literal("富营养的 ").withStyle(ChatFormatting.GREEN)
+                        .append(oldName.withStyle(oldStyle));
+                result_itemstack.setHoverName(newName);
+                cir.setReturnValue(result_itemstack);
+            }
         }
     }
 }
