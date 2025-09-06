@@ -6,8 +6,10 @@
   "mixins": [
     "BlockBehaviourMixin",
     "ChunkMapMixinAccess",
-    "CraftingMenuMixin",
-    "StateHolderMixinAccess"
+    "StateHolderMixinAccess",
+    "recipe.AbstractCookingRecipeMixin",
+    "recipe.ShapedRecipeMixin",
+    "recipe.SingleItemRecipeMixin"
   ],
   "client": [
   ],
