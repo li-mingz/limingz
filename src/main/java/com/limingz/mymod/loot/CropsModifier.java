@@ -68,7 +68,7 @@ public class CropsModifier extends LootModifier {
         return generatedLoot;
     }
 
-    private static boolean isNutritious(ItemStack stack) {
+    public static boolean isNutritious(ItemStack stack) {
         return stack.hasTag() && stack.getTag().contains(TAG_NUTRITIOUS);
     }
 
@@ -84,7 +84,7 @@ public class CropsModifier extends LootModifier {
 
         ItemStack foodStack = event.getItem();
 
-        // 检查食物是否拥有自定义标签
+        // 检查是否是食物且拥有自定义标签
         if (!isNutritious(foodStack)) return;
         FoodProperties foodProperties = foodStack.getItem().getFoodProperties();
         if (foodProperties == null) return;
@@ -95,8 +95,12 @@ public class CropsModifier extends LootModifier {
         float extra_nutrition = foodStack.getTag().getFloat(TAG_NUTRITIOUS);
         int bonusNutrition = Mth.floor(nutrition * extra_nutrition); // 额外营养值
         float bonusSaturation = saturation * extra_nutrition; // 额外饱和度
+        // 额外营养值和饱和度补充的数值不低于1
+        bonusNutrition = Math.max(bonusNutrition, 1);
+        bonusSaturation = Math.max(bonusSaturation, 1);
 
         // 应用额外饱食效果
         player.getFoodData().eat(bonusNutrition, bonusSaturation);
     }
+
 }
