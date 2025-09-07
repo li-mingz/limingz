@@ -192,16 +192,16 @@ dependencies {
     implementation fg.deobf("local:caerula_arbor:${caerula_arbor_version}-forge-1.20.1")
     // 使用非Minecraft依赖
     // https://fg-doc-6x-zh-cn.readthedocs.io/zh-cn/latest/dependencies/
-    minecraftLibrary 'org.xerial:sqlite-jdbc:3.50.3.0'
-    minecraftLibrary 'com.zaxxer:HikariCP:6.3.0'
+//    minecraftLibrary 'org.xerial:sqlite-jdbc:3.50.3.0'
+//    minecraftLibrary 'com.zaxxer:HikariCP:6.3.0'
     // 打包外部依赖进入jar
     // https://fg-doc-6x-zh-cn.readthedocs.io/zh-cn/latest/dependencies/jarinjar/
-    jarJar(group: 'org.xerial', name: 'sqlite-jdbc', version: '[3.0,4.0)') {
-        jarJar.pin(it, '3.50.3.0') // 显式固定版本
-    }
-    jarJar(group: 'com.zaxxer', name: 'HikariCP', version: '[5.0,7.0)') {
-        jarJar.pin(it, '6.3.0') // 显式固定版本
-    }
+//    jarJar(group: 'org.xerial', name: 'sqlite-jdbc', version: '[3.0,4.0)') {
+//        jarJar.pin(it, '3.50.3.0') // 显式固定版本
+//    }
+//    jarJar(group: 'com.zaxxer', name: 'HikariCP', version: '[5.0,7.0)') {
+//        jarJar.pin(it, '6.3.0') // 显式固定版本
+//    }
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html

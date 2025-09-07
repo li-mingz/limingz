@@ -1,5 +1,6 @@
 package com.limingz.mymod.event.server;
 
+import com.limingz.mymod.capability.chunkdata.ChunkDataProvider;
 import com.limingz.mymod.capability.farmxp.PlayerFarmXpProvider;
 import com.limingz.mymod.gui.overlay.FarmXpOverlay;
 import com.limingz.mymod.network.Channel;
@@ -29,6 +30,7 @@ public class ModEventListener {
     @SubscribeEvent
     public static void registerCapability(RegisterCapabilitiesEvent event) {
         event.register(PlayerFarmXpProvider.class);
+        event.register(ChunkDataProvider.class);
     }
 
     @SubscribeEvent

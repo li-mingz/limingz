@@ -1,4 +1,4 @@
-package com.limingz.mymod.capability.farmxp;
+package com.limingz.mymod.capability.chunkdata;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -12,27 +12,26 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PlayerFarmXpProvider implements ICapabilityProvider, INBTSerializable {
-    public static final Capability<PlayerFarmXp> PLAYER_FARM_XP_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
+public class ChunkDataProvider implements ICapabilityProvider, INBTSerializable {
+    public static final Capability<ChunkData> CHUNK_DATA_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
     });
-    public static int farm_xp_client = 0;
-    private PlayerFarmXp playerFarmXp;
-    private final LazyOptional<PlayerFarmXp> lazyOptional = LazyOptional.of(() -> this.playerFarmXp);
+    private ChunkData chunkData;
+    private final LazyOptional<ChunkData> lazyOptional = LazyOptional.of(() -> this.chunkData);
 
-    public PlayerFarmXpProvider() {
-        playerFarmXp = new PlayerFarmXp();
+    public ChunkDataProvider() {
+        chunkData = new ChunkData();
     }
 
     @Override
     public Tag serializeNBT() {
         var tag = new CompoundTag();
-        playerFarmXp.saveNBTData(tag);
+        chunkData.saveNBTData(tag);
         return tag;
     }
 
     @Override
     public void deserializeNBT(Tag nbt) {
-        playerFarmXp.loadNBTData((CompoundTag) nbt);
+        chunkData.loadNBTData((CompoundTag) nbt);
     }
 
     @Override
@@ -42,9 +41,9 @@ public class PlayerFarmXpProvider implements ICapabilityProvider, INBTSerializab
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap) {
-        if (cap == PLAYER_FARM_XP_CAPABILITY) {
+        if (cap == CHUNK_DATA_CAPABILITY) {
             return lazyOptional.cast();
         }
-        return lazyOptional.empty();
+        return LazyOptional.empty();
     }
 }
