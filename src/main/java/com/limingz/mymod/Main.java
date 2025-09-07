@@ -5,6 +5,7 @@ import com.limingz.mymod.block.DeskBlock;
 import com.limingz.mymod.block.SmallDoorBlock;
 import com.limingz.mymod.block.entity.DemoBlockEntity;
 import com.limingz.mymod.block.entity.DeskBlockEntity;
+import com.limingz.mymod.capability.chunkdata.ChunkDataProvider;
 import com.limingz.mymod.capability.farmxp.PlayerFarmXpProvider;
 import com.limingz.mymod.config.CommonConfig;
 import com.limingz.mymod.gui.container.DeskBlockContainerMenu;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
@@ -106,14 +108,24 @@ public class Main {
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, this::attachCapability);
+        MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, this::attachCapabilityForEntity);
+        MinecraftForge.EVENT_BUS.addGenericListener(LevelChunk.class, this::attachCapabilityForChunk);
 
     }
 
-    public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
+    public void attachCapabilityForEntity(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player player) {
             if (!player.getCapability(PlayerFarmXpProvider.PLAYER_FARM_XP_CAPABILITY).isPresent()) {
                 event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "farm_xp"), new PlayerFarmXpProvider());
+            }
+        }
+    }
+
+    public void attachCapabilityForChunk(AttachCapabilitiesEvent<LevelChunk> event) {
+        LevelChunk levelChunk = event.getObject();
+        if (levelChunk != null) {
+            if (!levelChunk.getCapability(ChunkDataProvider.CHUNK_DATA_CAPABILITY).isPresent()) {
+                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "is_nutritious"), new ChunkDataProvider());
             }
         }
     }
