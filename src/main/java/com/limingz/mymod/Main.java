@@ -125,9 +125,7 @@ public class Main {
         LevelChunk levelChunk = event.getObject();
         if (levelChunk != null) {
             if (!levelChunk.getCapability(ChunkDataProvider.CHUNK_DATA_CAPABILITY).isPresent()) {
-                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "is_nutritious"), new ChunkDataProvider());
-                // 标记区块需要保存
-                levelChunk.setUnsaved(true);
+                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "is_nutritious"), new ChunkDataProvider(levelChunk));
             }
         }
     }

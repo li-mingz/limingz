@@ -3,6 +3,7 @@ package com.limingz.mymod.capability.chunkdata;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -18,8 +19,8 @@ public class ChunkDataProvider implements ICapabilityProvider, INBTSerializable 
     private ChunkData chunkData;
     private final LazyOptional<ChunkData> lazyOptional = LazyOptional.of(() -> this.chunkData);
 
-    public ChunkDataProvider() {
-        chunkData = new ChunkData();
+    public ChunkDataProvider(LevelChunk levelChunk) {
+        chunkData = new ChunkData(levelChunk);
     }
 
     @Override

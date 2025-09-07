@@ -2,6 +2,7 @@ package com.limingz.mymod.event.server;
 
 import com.limingz.mymod.capability.farmxp.PlayerFarmXpProvider;
 import com.limingz.mymod.command.EndingCommand;
+import com.limingz.mymod.command.GetChunkNutritiousCommand;
 import com.limingz.mymod.command.GetFarmXpCommand;
 import com.limingz.mymod.config.CommonConfig;
 import com.limingz.mymod.network.Channel;
@@ -39,6 +40,7 @@ public class ForgeEventListener {
     public static void registerCommand(RegisterCommandsEvent event) {
         GetFarmXpCommand.register(event.getDispatcher());
         EndingCommand.register(event.getDispatcher());
+        GetChunkNutritiousCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent

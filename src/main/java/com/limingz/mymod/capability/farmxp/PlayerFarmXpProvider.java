@@ -2,7 +2,6 @@ package com.limingz.mymod.capability.farmxp;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -12,7 +11,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PlayerFarmXpProvider implements ICapabilityProvider, INBTSerializable {
+public class PlayerFarmXpProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
     public static final Capability<PlayerFarmXp> PLAYER_FARM_XP_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
     });
     public static int farm_xp_client = 0;
@@ -24,15 +23,15 @@ public class PlayerFarmXpProvider implements ICapabilityProvider, INBTSerializab
     }
 
     @Override
-    public Tag serializeNBT() {
+    public CompoundTag serializeNBT() {
         var tag = new CompoundTag();
         playerFarmXp.saveNBTData(tag);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(Tag nbt) {
-        playerFarmXp.loadNBTData((CompoundTag) nbt);
+    public void deserializeNBT(CompoundTag nbt) {
+        playerFarmXp.loadNBTData(nbt);
     }
 
     @Override
