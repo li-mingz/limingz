@@ -1,9 +1,8 @@
 package com.limingz.mymod.capability.chunkdata;
 
+import com.limingz.mymod.config.TagID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.chunk.LevelChunk;
-
-import static com.limingz.mymod.Main.MODID;
 
 public class ChunkData {
     // 区块是否为富营养的
@@ -31,11 +30,11 @@ public class ChunkData {
     }
 
     public void saveNBTData(CompoundTag compoundTag) {
-        compoundTag.putBoolean(MODID+":is_nutritious", this.is_nutritious);
+        compoundTag.putBoolean(TagID.IsNutritiousTagID, this.is_nutritious);
     }
 
     public void loadNBTData(CompoundTag compoundTag) {
-        this.is_nutritious = compoundTag.getBoolean(MODID+":is_nutritious");
+        this.is_nutritious = compoundTag.getBoolean(TagID.IsNutritiousTagID);
     }
 
 }

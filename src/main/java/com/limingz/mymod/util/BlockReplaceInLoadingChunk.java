@@ -53,6 +53,8 @@ public class BlockReplaceInLoadingChunk {
                 // 检查是否有目标方块
                 if(section.getStates().maybeHas(blockState -> BlockReplaceList.replace_name_Map.containsKey(ForgeRegistries.BLOCKS.getKey(blockState.getBlock()).toString()))){
                     // 有则遍历该子区块
+                    // 子区块替换方块计数
+                    int temp_count = 0;
                     // 遍历 x, y, z 坐标（0 到 15）
                     for (int x = 0; x < 16; x++) {
                         for (int y = 0; y < 16; y++) {
@@ -81,12 +83,16 @@ public class BlockReplaceInLoadingChunk {
                                         }
                                     }
                                     section.setBlockState(x, y, z, new_blockState);
-                                    replaceBlockCount++;
+                                    temp_count++;
                                 }
                             }
                         }
                     }
-                    needUpdate = true;
+                    // 为有效替换才保存
+                    if(temp_count>0){
+                        replaceBlockCount+=temp_count;
+                        needUpdate = true;
+                    }
                 }
             }
             if(needUpdate){
