@@ -1,6 +1,7 @@
 package com.limingz.mymod.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.limingz.mymod.config.BlockReplaceList;
 import com.limingz.mymod.event.server.ForgeMinecraftServerEvent;
 import com.limingz.mymod.mixins.ChunkMapMixinAccess;
 import com.limingz.mymod.mixins.StateHolderMixinAccess;

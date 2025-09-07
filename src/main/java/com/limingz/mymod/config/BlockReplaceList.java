@@ -1,4 +1,4 @@
-package com.limingz.mymod.util;
+package com.limingz.mymod.config;
 
 import net.mcreator.caerulaarbor.CaerulaArborMod;
 import net.minecraft.resources.ResourceLocation;

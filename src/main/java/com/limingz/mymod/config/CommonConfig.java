@@ -22,8 +22,8 @@ public class CommonConfig {
     private static ForgeConfigSpec.Builder BUIDER = new ForgeConfigSpec.Builder();
     private static ForgeConfigSpec.IntValue XPINCREASE = BUIDER.defineInRange("xp_increase", 1, 0, Integer.MAX_VALUE);
     private static ForgeConfigSpec.IntValue XPDECREASE = BUIDER.defineInRange("xp_decrease", 1, 0, Integer.MAX_VALUE);
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> BLOCK_USE_XP_LIST = BUIDER.defineListAllowEmpty("block_use_xp_list", List.of("minecraft:carrots"), CommonConfig::allow);
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> BLOCK_GET_XP_LIST = BUIDER.defineListAllowEmpty("block_get_xp_list", List.of("minecraft:potatoes"), CommonConfig::allow);
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> BLOCK_USE_XP_LIST = BUIDER.defineListAllowEmpty("block_use_xp_list", List.of(), CommonConfig::allow);
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> BLOCK_GET_XP_LIST = BUIDER.defineListAllowEmpty("block_get_xp_list", List.of(), CommonConfig::allow);
     public static ForgeConfigSpec SPEC = BUIDER.build();
     
     private static boolean allow(Object obj) {

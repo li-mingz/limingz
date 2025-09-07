@@ -1,5 +1,6 @@
 package com.limingz.mymod.util;
 
+import com.limingz.mymod.config.BlockReplaceList;
 import com.limingz.mymod.event.server.ForgeMinecraftServerEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

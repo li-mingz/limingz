@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "mixins.mymod.refmap.json",
   "mixins": [
-    "BlockBehaviourMixin",
     "ChunkMapMixinAccess",
     "StateHolderMixinAccess",
     "recipe.AbstractCookingRecipeMixin",

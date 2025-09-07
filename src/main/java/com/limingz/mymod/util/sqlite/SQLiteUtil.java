@@ -77,17 +77,15 @@ public class SQLiteUtil {
         config.addDataSourceProperty("cachePrepStmts", true); // 启用预编译语句缓存
         return config;
     }
-
     private static void createTable(){
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
 
             // 建表（IF NOT EXISTS保障幂等性）
             stmt.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS block_pos (" +
+                    "CREATE TABLE IF NOT EXISTS chunk_pos (" +
                             "    id INTEGER PRIMARY KEY," +
                             "    x INT NOT NULL," +
-                            "    y INT NOT NULL," +
                             "    z INT NOT NULL," +
                             "    name TEXT," +
                             "    chunk_x INT NOT NULL," +
@@ -96,7 +94,7 @@ public class SQLiteUtil {
                             ");"
             );
             // 建立索引
-            stmt.executeUpdate("CREATE INDEX IF NOT EXISTS chunk_index ON block_pos(chunk_x ASC, chunk_y ASC);");
+            stmt.executeUpdate("CREATE INDEX IF NOT EXISTS chunk_index ON chunk_pos(x ASC, z ASC);");
         } catch (SQLException e) {
             throw new RuntimeException("初始化失败", e);
         }
