@@ -1,6 +1,7 @@
 package com.limingz.mymod.util;
 
 import com.limingz.mymod.config.BlockReplaceList;
+import com.limingz.mymod.config.TagID;
 import com.limingz.mymod.event.server.ForgeMinecraftServerEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -214,6 +215,17 @@ public class RegionUtil {
                 }
                 if (need_write){
 
+                    // 修改区块Capability数据
+                    // 获取根Capability, 如果不存在则会返回一个空的CompoundTag
+                    CompoundTag forgeCapsTag = nbt.getCompound("ForgeCaps");
+                    // 获取富营养的标签, 如果不存在则会返回一个空的CompoundTag
+                    CompoundTag nutritiousTag = forgeCapsTag.getCompound(TagID.IsNutritiousTagID);
+                    // 标记为富营养的区块
+                    nutritiousTag.putBoolean(TagID.IsNutritiousTagName, true);
+                    // 后面两步确保标签不存在时创建标签
+                    forgeCapsTag.put(TagID.IsNutritiousTagID, nutritiousTag);
+                    nbt.put("ForgeCaps", forgeCapsTag);
+
                     // 移除高度图数据
                     if (nbt.contains("Heightmaps")) {
                         nbt.remove("Heightmaps");
@@ -221,9 +233,11 @@ public class RegionUtil {
 
                     // 标记光照未初始化
                     nbt.putBoolean("LightPopulated", false);
+                    // 写入文件
                     try (DataOutputStream dos = region.getChunkDataOutputStream(chunkPos)) {
                         NbtIo.write(nbt, dos);
                     }
+
                     writeChunkCount++;
                 }
                 traversalChunkCount++;

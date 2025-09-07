@@ -1,13 +1,17 @@
 package com.limingz.mymod.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.limingz.mymod.capability.chunkdata.ChunkDataProvider;
 import com.limingz.mymod.config.BlockReplaceList;
+import com.limingz.mymod.config.TagID;
 import com.limingz.mymod.event.server.ForgeMinecraftServerEvent;
 import com.limingz.mymod.mixins.ChunkMapMixinAccess;
 import com.limingz.mymod.mixins.StateHolderMixinAccess;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
@@ -43,7 +47,7 @@ public class BlockReplaceInLoadingChunk {
         updatingChunkMap.forEach((key, value) -> {
             ChunkAccess chunkAccess = value.getLastAvailable();
             // 跳过未完全生成的区块
-            if (!(chunkAccess instanceof LevelChunk)) return;
+            if (!(chunkAccess instanceof LevelChunk levelChunk)) return;
             LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
             // 是否需要更新该区块
             Boolean needUpdate = false;
@@ -96,10 +100,14 @@ public class BlockReplaceInLoadingChunk {
                 }
             }
             if(needUpdate){
+                // 修改区块Capability
+                levelChunk.getCapability(ChunkDataProvider.CHUNK_DATA_CAPABILITY).ifPresent((data) -> {
+                    data.set_nutritious(true);
+                });
                 chunkAccess.setLightCorrect(false);    // 标记高度图需重新计算
                 chunkAccess.setUnsaved(true);
                 // 向玩家发送区块更新
-                updatePlayersForChunk(serverLevel, (LevelChunk)chunkAccess, chunkAccess.getPos());
+                updatePlayersForChunk(serverLevel, levelChunk, chunkAccess.getPos());
                 writeChunkCount++;
             }
             traversalChunkCount++;

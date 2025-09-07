@@ -8,6 +8,7 @@ import com.limingz.mymod.block.entity.DeskBlockEntity;
 import com.limingz.mymod.capability.chunkdata.ChunkDataProvider;
 import com.limingz.mymod.capability.farmxp.PlayerFarmXpProvider;
 import com.limingz.mymod.config.CommonConfig;
+import com.limingz.mymod.config.TagID;
 import com.limingz.mymod.gui.container.DeskBlockContainerMenu;
 import com.limingz.mymod.item.TicketItem;
 import com.limingz.mymod.register.LootModifierRegister;
@@ -125,7 +126,7 @@ public class Main {
         LevelChunk levelChunk = event.getObject();
         if (levelChunk != null) {
             if (!levelChunk.getCapability(ChunkDataProvider.CHUNK_DATA_CAPABILITY).isPresent()) {
-                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "is_nutritious"), new ChunkDataProvider(levelChunk));
+                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, TagID.IsNutritiousTagName), new ChunkDataProvider(levelChunk));
             }
         }
     }

@@ -30,11 +30,11 @@ public class ChunkData {
     }
 
     public void saveNBTData(CompoundTag compoundTag) {
-        compoundTag.putBoolean(TagID.IsNutritiousTagID, this.is_nutritious);
+        compoundTag.putBoolean(TagID.IsNutritiousTagName, this.is_nutritious);
     }
 
     public void loadNBTData(CompoundTag compoundTag) {
-        this.is_nutritious = compoundTag.getBoolean(TagID.IsNutritiousTagID);
+        this.is_nutritious = compoundTag.getBoolean(TagID.IsNutritiousTagName);
     }
 
 }
