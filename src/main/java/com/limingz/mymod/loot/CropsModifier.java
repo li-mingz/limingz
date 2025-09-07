@@ -1,5 +1,6 @@
 package com.limingz.mymod.loot;
 
+import com.limingz.mymod.capability.chunkdata.ChunkDataProvider;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.common.loot.LootModifier;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
@@ -50,21 +52,27 @@ public class CropsModifier extends LootModifier {
         // 计算区块坐标
         int chunkX = ((int) Math.floor(originVector.x)) >> 4;
         int chunkZ = ((int) Math.floor(originVector.z)) >> 4;
-        for(ItemStack itemStack : generatedLoot){
-            // 获取物品的食物属性
-            FoodProperties foodProperties = itemStack.getItem().getFoodProperties(itemStack, null);
-            // 跳过不可食用的和已经有标签的
-            if(foodProperties == null || isNutritious(itemStack)) continue;
-            CompoundTag tag = itemStack.getOrCreateTag();
-            tag.putFloat(TAG_NUTRITIOUS, 1.0f);
-            // 更改物品名称
-            MutableComponent oldName = itemStack.getHoverName().copy();
-            Style oldStyle = oldName.getStyle();
-            if(oldStyle.isEmpty()) oldStyle = oldStyle.applyFormats(ChatFormatting.WHITE);
-            MutableComponent newName = Component.literal("富营养的 ").withStyle(ChatFormatting.GREEN)
-                    .append(oldName.withStyle(oldStyle));
-            itemStack.setHoverName(newName);
-        }
+        // 检查区块是否富营养化
+        context.getLevel().getChunk(chunkX, chunkZ).getCapability(ChunkDataProvider.CHUNK_DATA_CAPABILITY).ifPresent((data) -> {
+            // 只有区块富营养化才加标签
+            if(data.get_nutritious()){
+                for(ItemStack itemStack : generatedLoot){
+                    // 获取物品的食物属性
+                    FoodProperties foodProperties = itemStack.getItem().getFoodProperties(itemStack, null);
+                    // 跳过不可食用的和已经有标签的
+                    if(foodProperties == null || isNutritious(itemStack)) continue;
+                    CompoundTag tag = itemStack.getOrCreateTag();
+                    tag.putFloat(TAG_NUTRITIOUS, 1.0f);
+                    // 更改物品名称
+                    MutableComponent oldName = itemStack.getHoverName().copy();
+                    Style oldStyle = oldName.getStyle();
+                    if(oldStyle.isEmpty()) oldStyle = oldStyle.applyFormats(ChatFormatting.WHITE);
+                    MutableComponent newName = Component.literal("富营养的 ").withStyle(ChatFormatting.GREEN)
+                            .append(oldName.withStyle(oldStyle));
+                    itemStack.setHoverName(newName);
+                }
+            }
+        });
         return generatedLoot;
     }
 
