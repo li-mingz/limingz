@@ -1,5 +1,6 @@
 package com.limingz.mymod.datagen;
 
+import com.limingz.mymod.register.BlockRegister;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.BlockTagsProvider;
@@ -7,8 +8,6 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
-
-import static com.limingz.mymod.Main.small_door;
 import static net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL;
 
 public class Tags extends BlockTagsProvider {
@@ -18,6 +17,6 @@ public class Tags extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(NEEDS_IRON_TOOL).add(small_door.get());
+        tag(NEEDS_IRON_TOOL).add(BlockRegister.small_door.get());
     }
 }

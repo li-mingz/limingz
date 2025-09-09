@@ -1,5 +1,6 @@
 package com.limingz.mymod.block.entity;
 
+import com.limingz.mymod.register.BlockEntityRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -18,8 +19,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static com.limingz.mymod.Main.desk_block_entity;
-
 public class DeskBlockEntity extends BlockEntity {
     private static final String TAG_NAME = "Item";
     private final ItemStackHandler items = new ItemStackHandler(1) {
@@ -32,7 +31,7 @@ public class DeskBlockEntity extends BlockEntity {
     private final LazyOptional<IItemHandler> iItemHandler = LazyOptional.of(() -> items);
 
     public DeskBlockEntity(BlockPos pPos, BlockState pBlockState) {
-        super(desk_block_entity.get(), pPos, pBlockState);
+        super(BlockEntityRegister.desk_block_entity.get(), pPos, pBlockState);
     }
 
     public ItemStackHandler getItems() {

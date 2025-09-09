@@ -4,6 +4,8 @@ import com.limingz.mymod.capability.chunkdata.ChunkDataProvider;
 import com.limingz.mymod.capability.farmxp.PlayerFarmXpProvider;
 import com.limingz.mymod.gui.overlay.FarmXpOverlay;
 import com.limingz.mymod.network.Channel;
+import com.limingz.mymod.register.BlockRegister;
+import com.limingz.mymod.register.ItemRegister;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -20,10 +22,10 @@ public class ModEventListener {
     @SubscribeEvent
     public static void addCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-            event.accept(myblock);
+            event.accept(BlockRegister.myblock);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(ticket);
+            event.accept(ItemRegister.ticket);
         }
     }
 

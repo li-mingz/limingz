@@ -1,5 +1,6 @@
 package com.limingz.mymod.item;
 
+import com.limingz.mymod.register.BlockRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -11,8 +12,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import static com.limingz.mymod.Main.myblock;
-
 public class TicketItem extends Item {
     public TicketItem(Properties p_41383_) {
         super(p_41383_);
@@ -23,7 +22,7 @@ public class TicketItem extends Item {
         BlockPos blockpos = context.getClickedPos();
         BlockState blockstate = level.getBlockState(blockpos);
         Block block = blockstate.getBlock();
-        if (block == myblock.get()) {
+        if (block == BlockRegister.myblock.get()) {
             Player player = context.getPlayer();
             player.addItem(new ItemStack(Items.COOKED_COD));
             var itemstack = context.getItemInHand();

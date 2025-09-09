@@ -21,7 +21,7 @@ public class LightCircle extends Circle{
     private float dynamicAngle = 0f;  // 当前光效头部的角度
 
     private float brightnessIntensity = 0.5f;  // 光效增加的最高亮度
-    private double renderTick = 0; // 系统时间
+    private double renderTick = 0; // 渲染计数时间
 
     public LightCircle(String id, float x, float y, int segments, float radius, float lineWidth, int color) {
         super(id, x, y, segments, radius, lineWidth, color);

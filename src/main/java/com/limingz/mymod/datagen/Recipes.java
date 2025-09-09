@@ -1,6 +1,7 @@
 package com.limingz.mymod.datagen;
 
 import com.limingz.mymod.Main;
+import com.limingz.mymod.register.BlockRegister;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -17,7 +18,7 @@ public class Recipes extends RecipeProvider {
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Main.small_door.get())
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BlockRegister.small_door.get())
                 .pattern("   ")
                 .pattern("axa")
                 .pattern("axa")

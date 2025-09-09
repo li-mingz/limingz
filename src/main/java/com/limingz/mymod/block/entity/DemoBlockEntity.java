@@ -1,6 +1,7 @@
 package com.limingz.mymod.block.entity;
 
 import com.limingz.mymod.Main;
+import com.limingz.mymod.register.BlockEntityRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,7 +19,7 @@ public class DemoBlockEntity extends BlockEntity {
     }
 
     public DemoBlockEntity(BlockPos pos, BlockState state) {
-        super(Main.demo_block_entity.get(), pos, state);
+        super(BlockEntityRegister.demo_block_entity.get(), pos, state);
     }
 
     public void serverTick() {
