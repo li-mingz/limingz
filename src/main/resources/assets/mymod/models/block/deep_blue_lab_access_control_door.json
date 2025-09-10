@@ -1,0 +1,7 @@
+{
+	"render_type": "translucent",
+	"ambientocclusion": true,
+	"textures": {
+		"particle": "mymod:block/deep_blue_lab_access_control_door"
+	}
+}
