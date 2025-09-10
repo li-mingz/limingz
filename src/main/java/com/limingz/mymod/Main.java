@@ -41,6 +41,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import software.bernie.geckolib.GeckoLib;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Main.MODID)
@@ -71,6 +72,8 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, this::attachCapabilityForEntity);
         MinecraftForge.EVENT_BUS.addGenericListener(LevelChunk.class, this::attachCapabilityForChunk);
+        // 初始化GeckoLib
+        GeckoLib.initialize();
 
     }
 
