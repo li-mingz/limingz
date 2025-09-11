@@ -2,16 +2,17 @@
 	"format_version": "1.8.0",
 	"animations": {
 		"animation.deep_blue_lab_access_control_door.opening": {
-			"animation_length": 10,
+			"loop": "hold_on_last_frame",
+			"animation_length": 15,
 			"bones": {
 				"left": {
 					"position": {
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
-						"10.0": {
+						"15.0": {
 							"vector": [56, 0, 0],
-							"easing": "easeInOutQuad"
+							"easing": "easeInOutCubic"
 						}
 					}
 				},
@@ -20,8 +21,36 @@
 						"0.0": {
 							"vector": [0, 0, 0]
 						},
-						"10.0": {
+						"15.0": {
 							"vector": [-56, 0, 0],
+							"easing": "easeInOutCubic"
+						}
+					}
+				}
+			}
+		},
+		"animation.deep_blue_lab_access_control_door.closing": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 15,
+			"bones": {
+				"left": {
+					"position": {
+						"0.0": {
+							"vector": [56, 0, 0]
+						},
+						"15.0": {
+							"vector": [0, 0, 0],
+							"easing": "easeInOutQuad"
+						}
+					}
+				},
+				"right": {
+					"position": {
+						"0.0": {
+							"vector": [-56, 0, 0]
+						},
+						"15.0": {
+							"vector": [0, 0, 0],
 							"easing": "easeInOutQuad"
 						}
 					}
