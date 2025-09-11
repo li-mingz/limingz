@@ -1,6 +1,6 @@
 package com.limingz.mymod.event.client;
 
-import com.limingz.mymod.block.entity.client.TestDoorBlockRenderer;
+import com.limingz.mymod.block.entity.client.DeepBlueLabAccessControlDoorRenderer;
 import com.limingz.mymod.gui.holographic_ui.renderer.blockentity.DemoBlockEntityRenderer;
 import com.limingz.mymod.gui.screen.DeskBlockContainerScreen;
 import com.limingz.mymod.register.BlockEntityRegister;
@@ -21,7 +21,7 @@ public class ClientModEventListener {
     public static void registerBlockEntityRenderer(EntityRenderersEvent.RegisterRenderers event){
         event.registerBlockEntityRenderer(BlockEntityRegister.desk_block_entity.get(), DeskBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(BlockEntityRegister.demo_block_entity.get(), DemoBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(BlockEntityRegister.test_door_block_entity.get(), TestDoorBlockRenderer::new);
+        event.registerBlockEntityRenderer(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), DeepBlueLabAccessControlDoorRenderer::new);
     }
     @SubscribeEvent
     public static void registerScreen(FMLClientSetupEvent event){

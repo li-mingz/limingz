@@ -17,6 +17,6 @@ public class BlockRegister {
     public static final RegistryObject<Block> desk_block = BLOCKS.register("desk_block", () -> new DeskBlock(BlockBehaviour.Properties.of().strength(1.0f)));
     public static final RegistryObject<Block> demo_block = BLOCKS.register("demo_block",
             () -> new DemoBlock(BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.STONE)));
-    public static final RegistryObject<Block> test_door_block = BLOCKS.register("test_door_block",
-            () -> new TestDoorBlock(BlockBehaviour.Properties.of().noCollission()));
+    public static final RegistryObject<Block> deep_blue_lab_access_control_door = BLOCKS.register("deep_blue_lab_access_control_door",
+            () -> new DeepBlueLabAccessControlDoor(BlockBehaviour.Properties.of().noCollission()));
 }

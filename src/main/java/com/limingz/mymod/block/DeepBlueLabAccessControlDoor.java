@@ -8,14 +8,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class TestDoorBlock extends BaseEntityBlock {
-    public TestDoorBlock(Properties pProperties) {
+public class DeepBlueLabAccessControlDoor extends BaseEntityBlock {
+
+    public DeepBlueLabAccessControlDoor(Properties pProperties) {
         super(pProperties);
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return BlockEntityRegister.test_door_block_entity.get().create(pPos, pState);
+        return BlockEntityRegister.deep_blue_lab_access_control_door_entity.get().create(pPos, pState);
     }
 
     @Override

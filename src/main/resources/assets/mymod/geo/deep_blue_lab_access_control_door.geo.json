@@ -1,0 +1,37 @@
+{
+	"format_version": "1.21.20",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.deep_blue_lab_access_control_door",
+				"texture_width": 256,
+				"texture_height": 256,
+				"visible_bounds_width": 15,
+				"visible_bounds_height": 8,
+				"visible_bounds_offset": [0, 3, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "left",
+					"parent": "root",
+					"pivot": [28, 48, 0],
+					"cubes": [
+						{"origin": [0, 0, -3], "size": [56, 96, 6], "uv": [0, 102]}
+					]
+				},
+				{
+					"name": "right",
+					"parent": "root",
+					"pivot": [-28, 48, 0],
+					"cubes": [
+						{"origin": [-56, 0, -3], "size": [56, 96, 6], "uv": [0, 0]}
+					]
+				}
+			]
+		}
+	]
+}

@@ -19,6 +19,7 @@ public class TabRegister {
                 output.accept(ItemRegister.small_door_item.get());
                 output.accept(ItemRegister.desk_block_item.get());
                 output.accept(ItemRegister.demo_block_item.get());
+                output.accept(ItemRegister.deep_blue_lab_access_control_door_item.get());
             })
             .build());
 }
