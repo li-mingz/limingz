@@ -33,6 +33,7 @@ public class DoorTickPacket {
             BlockEntity blockEntity = level.getBlockEntity(blockPos);
             if(blockEntity instanceof DeepBlueLabAccessControlDoorEntity doorEntity){
                 doorEntity.setAnimationTick(animationTick);
+                doorEntity.setChanged();
             }
         });
         ctx.get().setPacketHandled(true);

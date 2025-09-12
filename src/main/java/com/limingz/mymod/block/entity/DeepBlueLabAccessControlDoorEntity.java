@@ -22,9 +22,7 @@ import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity {
-    protected static final RawAnimation OPEN_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.opening");
-
-    protected static final RawAnimation CLOSE_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.closing");
+    protected static final RawAnimation OPEN_AND_CLOSE_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.open_and_close");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     // 门的状态
@@ -34,10 +32,9 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         OPENING,
         CLOSING
     }
-    private DoorState doorState = DoorState.OPENING;
+    private DoorState doorState = DoorState.CLOSED;
     // 当前动画的帧数
     private double animationTick = 0;
-
     // 当前动画的长度
     private double animationLength = 0;
     // 是否需要加载动画的帧数
@@ -73,40 +70,44 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     protected PlayState doorAnimController(final AnimationState<DeepBlueLabAccessControlDoorEntity> state) {
 
         AnimationController<DeepBlueLabAccessControlDoorEntity> controller = state.getController();
+        AnimationControllerAccess animationControllerAccess = (AnimationControllerAccess) controller;
 
-        // 通过门的状态决定播放动画
-        if(doorState == DoorState.OPENING){
-            controller.setAnimation(OPEN_ANIM);
-        } else if(doorState == DoorState.CLOSING){
-            controller.setAnimation(CLOSE_ANIM);
-        } else if(doorState == DoorState.OPENED){
-            controller.setAnimation(OPEN_ANIM);
-        } else if(doorState == DoorState.CLOSED){
-            controller.setAnimation(CLOSE_ANIM);
-        }
-        if(needLoadTick){
-            // 加载动画帧
-            ((AnimationControllerAccess)controller).setAnimationTick(animationTick/2);
-            needLoadTick = false;
-        }
+        controller.setAnimation(OPEN_AND_CLOSE_ANIM);
         // 动画加载完后再获取
         if (controller.getCurrentAnimation() != null) {
             // 记录当前进度
             animationLength = controller.getCurrentAnimation().animation().length();
-            double offsetTick = ((AnimationControllerAccess)controller).getTickOffset();
-            // 计算当前动画帧
-            animationTick = Math.min(state.getAnimationTick()-offsetTick, animationLength) ;
+            double offsetTick = animationControllerAccess.getTickOffset();
+            if(needLoadTick){
+                // 加载动画帧
+                animationControllerAccess.setAnimationTick(animationTick);
+                needLoadTick = false;
+            } else {
+                // 加载时不需要计算动画帧
+                // 计算当前动画帧
+                animationTick = Math.min(state.getAnimationTick()-offsetTick, animationLength) ;
+            }
             // 更新动画状态
             if (doorState == DoorState.OPENING || doorState == DoorState.CLOSING) {
                 // 检查动画是否完成
-                if (doorState == DoorState.OPENING && animationTick >= animationLength) {
+                if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
                     doorState = DoorState.OPENED;
+                    // 同步开门状态
+                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength/2));
                 } else if(doorState == DoorState.CLOSING && animationTick >= animationLength) {
                     doorState = DoorState.CLOSED;
+                    // 同步关门状态
+                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength));
                 }
             }
         }
-
+        if(doorState == DoorState.CLOSED){
+            animationTick = animationLength;
+            animationControllerAccess.setAnimationTick(animationTick);
+        } else if(doorState == DoorState.OPENED){
+            animationTick = animationLength/2;
+            animationControllerAccess.setAnimationTick(animationTick);
+        }
         return PlayState.CONTINUE;
     }
 
