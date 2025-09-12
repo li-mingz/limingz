@@ -4,7 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "mixins.mymod.refmap.json",
   "mixins": [
-    "AnimationControllerAccess",
+    "AnimationControllerMixin",
     "ChunkMapMixinAccess",
     "StateHolderMixinAccess",
     "recipe.AbstractCookingRecipeMixin",

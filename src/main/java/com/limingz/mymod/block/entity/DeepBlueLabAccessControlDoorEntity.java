@@ -1,6 +1,8 @@
 package com.limingz.mymod.block.entity;
 
-import com.limingz.mymod.mixins.AnimationControllerAccess;
+import com.limingz.mymod.mixins_access.AnimationControllerAccess;
+import com.limingz.mymod.network.Channel;
+import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.core.BlockPos;
@@ -35,6 +37,11 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     private DoorState doorState = DoorState.OPENING;
     // 当前动画的帧数
     private double animationTick = 0;
+
+    // 当前动画的长度
+    private double animationLength = 0;
+    // 是否需要加载动画的帧数
+    private Boolean needLoadTick = false;
 
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
@@ -77,12 +84,18 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         } else if(doorState == DoorState.CLOSED){
             controller.setAnimation(CLOSE_ANIM);
         }
-
+        if(needLoadTick){
+            // 加载动画帧
+            ((AnimationControllerAccess)controller).setAnimationTick(animationTick/2);
+            needLoadTick = false;
+        }
         // 动画加载完后再获取
         if (controller.getCurrentAnimation() != null) {
             // 记录当前进度
-            double animationLength = controller.getCurrentAnimation().animation().length();
-            animationTick = state.getAnimationTick();
+            animationLength = controller.getCurrentAnimation().animation().length();
+            double offsetTick = ((AnimationControllerAccess)controller).getTickOffset();
+            // 计算当前动画帧
+            animationTick = Math.min(state.getAnimationTick()-offsetTick, animationLength) ;
             // 更新动画状态
             if (doorState == DoorState.OPENING || doorState == DoorState.CLOSING) {
                 // 检查动画是否完成
@@ -96,6 +109,20 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
 
         return PlayState.CONTINUE;
     }
+
+
+
+    public Double getAnimationTick() {
+        return animationTick;
+    }
+    public void setAnimationTick(double animationTick) {
+        this.animationTick = animationTick;
+    }
+
+    public double getAnimationLength() {
+        return animationLength;
+    }
+
 
     // 数据同步
     @Override
@@ -129,6 +156,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         super.load(tag);
         doorState = DoorState.valueOf(tag.getString("doorState"));
         animationTick = tag.getDouble("animationTick");
+        needLoadTick = true;
     }
 
     @Override

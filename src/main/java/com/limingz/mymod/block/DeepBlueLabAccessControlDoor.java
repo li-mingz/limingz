@@ -1,6 +1,8 @@
 package com.limingz.mymod.block;
 
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
+import com.limingz.mymod.network.Channel;
+import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -32,10 +34,13 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if(!level.isClientSide){
-            if (level.getBlockEntity(pos) instanceof DeepBlueLabAccessControlDoorEntity doorEntity) {
+
+        if (level.getBlockEntity(pos) instanceof DeepBlueLabAccessControlDoorEntity doorEntity) {
+            if(!level.isClientSide){
                 // 切换门的状态
                 doorEntity.toggleDoor();
+            } else {
+                Channel.INSTANCE.sendToServer(new DoorTickPacket(pos, doorEntity.getAnimationLength()-doorEntity.getAnimationTick()));
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

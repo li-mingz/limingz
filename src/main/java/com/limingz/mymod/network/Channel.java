@@ -1,5 +1,6 @@
 package com.limingz.mymod.network;
 
+import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
 import com.limingz.mymod.network.packet.servertoplayer.FarmXpPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,7 +14,7 @@ import static com.limingz.mymod.Main.MODID;
 public class Channel {
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.fromNamespaceAndPath(MODID, "farm_xp"),
+            ResourceLocation.fromNamespaceAndPath(MODID, "main"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals
@@ -25,6 +26,11 @@ public class Channel {
                 .decoder(FarmXpPacket::new)
                 .encoder(FarmXpPacket::encode)
                 .consumerMainThread(FarmXpPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(DoorTickPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .decoder(DoorTickPacket::decode)
+                .encoder(DoorTickPacket::encode)
+                .consumerMainThread(DoorTickPacket::handle)
                 .add();
     }
 
