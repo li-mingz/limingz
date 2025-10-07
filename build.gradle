@@ -192,14 +192,6 @@ dependencies {
     implementation fg.deobf("local:caerula_arbor:${caerula_arbor_version}-forge-1.20.1")
     // 使用非Minecraft依赖
     // https://fg-doc-6x-zh-cn.readthedocs.io/zh-cn/latest/dependencies/
-    // Batik
-    minecraftLibrary ('org.apache.xmlgraphics:batik-all:1.19'){
-        exclude group: 'xml-apis', module: 'xml-apis' // 排除冲突的xml-apis
-    }
-    // Batik 动画支持
-    minecraftLibrary ('org.apache.xmlgraphics:batik-anim:1.19'){
-        exclude group: 'xml-apis', module: 'xml-apis' // 排除冲突的xml-apis
-    }
 //    minecraftLibrary 'org.xerial:sqlite-jdbc:3.50.3.0'
 //    minecraftLibrary 'com.zaxxer:HikariCP:6.3.0'
     // 打包外部依赖进入jar

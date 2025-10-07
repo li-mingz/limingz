@@ -17,30 +17,53 @@ import org.joml.Vector3f;
 
 public class UIRender {
     /**
-     * 绘制背景
-     * @param bufferSource 缓冲构建器, 用来将渲染数据格式化并上传到 OpenGL
+     * 绘制垂直矩形
+     * @param vertexConsumer 指定好渲染的顶点构建器
      * @param poseStack pose堆栈管理接口
-     * @param x 相对于原点的 x 坐标
-     * @param y 相对于原点的 y 坐标
-     * @param width 宽
-     * @param height 高
+     * @param left 矩形左侧边界的 x 坐标
+     * @param right 矩形右侧侧边界的 x 坐标
+     * @param top 矩形顶部边界的 y 坐标
+     * @param bottom 矩形底部边界的 y 坐标
      * @param light 封装的光照信息
      * @param combinedOverlay 指定当前顶点的覆盖纹理（Overlay Texture）坐标
      *                高 16 位（bits 16-31） 存储 U 坐标（水平方向）
      *                低 16 位（bits 0-15） 存储 V 坐标（垂直方向）
-     * @param texture 材质资源
      */
-    public static void renderBackground(MultiBufferSource bufferSource, PoseStack poseStack,
-                                        float x, float y, float width, float height, int light, int combinedOverlay,
-                                        ResourceLocation texture){
-        VertexConsumer bgVertexBuilder = bufferSource.getBuffer(RenderType.entityTranslucent(texture));
+    public static void renderVerticalRectangle(VertexConsumer vertexConsumer, PoseStack poseStack,
+                                       float left, float right, float top, float bottom, int light, int combinedOverlay){
         Matrix4f matrix = poseStack.last().pose();
         Vector3f normal = new Vector3f(0, 1, 0);
-        normal.rotateX((float) Math.toRadians(UIConfig.BG_ROTATION));
-        renderRectangle(bgVertexBuilder, matrix, normal, x, width + x, y, height + y,
+        renderVerticalRectangle(vertexConsumer, matrix, normal, left, right, top, bottom,
                 1, 1, 1, 1, light, combinedOverlay);
     }
 
+    /**
+     * 绘制垂直矩形
+     * @param builder 顶点渲染核心接口，用于构建和提交顶点数据到 GPU 进行渲染
+     * @param matrix 4x4 变换矩阵的实例，主要用于几何变换（平移/旋转/缩放）和投影计算
+     * @param normal 矩形的法线
+     * @param left 矩形左侧边界的 x 坐标
+     * @param right 矩形右侧侧边界的 x 坐标
+     * @param top 矩形顶部边界的 y 坐标
+     * @param bottom 矩形底部边界的 y 坐标
+     * @param r RGB
+     * @param g RGB
+     * @param b RGB
+     * @param a 透明度
+     * @param light 封装的光照信息
+     * @param overlay 指定当前顶点的覆盖纹理（Overlay Texture）坐标
+     *                高 16 位（bits 16-31） 存储 U 坐标（水平方向）
+     *                低 16 位（bits 0-15） 存储 V 坐标（垂直方向）
+     */
+    public static void renderVerticalRectangle(VertexConsumer builder, Matrix4f matrix, Vector3f normal,
+                                       float left, float right, float top, float bottom,
+                                       float r, float g, float b, float a,
+                                       int light, int overlay) {
+        addVertex(builder, matrix, normal, left, bottom, 0, 0, 1, r, g, b, a, light, overlay);
+        addVertex(builder, matrix, normal, right, bottom, 0, 1, 1, r, g, b, a, light, overlay);
+        addVertex(builder, matrix, normal, right, top, 0, 1, 0, r, g, b, a, light, overlay);
+        addVertex(builder, matrix, normal, left, top, 0, 0, 0, r, g, b, a, light, overlay);
+    }
 
     /**
      * 绘制矩形
