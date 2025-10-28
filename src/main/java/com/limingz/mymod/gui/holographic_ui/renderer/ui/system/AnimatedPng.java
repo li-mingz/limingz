@@ -57,70 +57,6 @@ public class AnimatedPng extends UIComponent {
         Main.LOGGER.info("加载 {} 个帧 从 {}", frameLocations.size(), folderPath);
         framesLoaded = true;
     }
-//
-//    /**
-//     * 设置播放方向
-//     * @param direction 1为正向播放, -1为反向播放
-//     */
-//    public void setDirection(int direction) {
-//        this.direction = direction > 0 ? 1 : -1;
-//    }
-//
-//    /**
-//     * 获取当前播放方向
-//     * @return 1为正向, -1为反向
-//     */
-//    public int getDirection() {
-//        return direction;
-//    }
-//
-//    /**
-//     * 设置当前播放帧
-//     */
-//    public void setFrame(int frame) {
-//        currentFrameIndex = frame;
-//    }
-//
-//    /**
-//     * 将当前播放帧设置为起始帧
-//     */
-//    public void playStartFrame() {
-//        currentFrameIndex = 0;
-//    }
-//
-//    /**
-//     * 将当前播放帧设置为终止帧
-//     */
-//    public void playEndFrame() {
-//        currentFrameIndex = frameLocations.size()-1;
-//    }
-//
-//    /**
-//     * 重置动画（从当前方向的起始帧重新开始）
-//     */
-//    public void resetAnimation() {
-//        if (direction == 1) {
-//            currentFrameIndex = 0;
-//        } else {
-//            currentFrameIndex = frameLocations.size() - 1;
-//        }
-//        lastFrameTick = PauseTick.getTick();
-//        isPlaying = true;
-//    }
-//
-//    /**
-//     * 设置播放模式
-//     */
-//    public void setPlayMode(PlayMode mode) {
-//       playMode = mode;
-//    }
-//
-//    /**
-//     * 设置上一帧渲染的时间，用于跳帧
-//     */
-//    public void setLastFrameTick(double time) {
-//        lastFrameTick = time;
-//    }
 
     @Override
     public void render(MultiBufferSource bufferSource, PoseStack poseStack, int combinedOverlay, float x, float y, BlockEntity blockEntity) {
@@ -139,6 +75,10 @@ public class AnimatedPng extends UIComponent {
         AnimatedPngState animatedPngState = animatedPngStateMap.get(this.id);
         double currentTick = PauseTick.getTick();
         double timeElapsed = currentTick - animatedPngState.lastFrameTick;
+        if(animatedPngState.currentFrameIndex == -1){
+            // -1 代表设置为最后一帧
+            animatedPngState.currentFrameIndex = frameLocations.size()-1;
+        }
 
         // 计算需要推进的帧数(仅播放时)
         if (animatedPngState.isPlaying && timeElapsed >= frameInterval) {
@@ -170,7 +110,8 @@ public class AnimatedPng extends UIComponent {
 
             animatedPngState.lastFrameTick += framesToAdvance * frameInterval;
         }
-
+        // 不渲染则跳过渲染环节
+        if (!animatedPngState.show) return;
         // 获取当前帧的纹理
         ResourceLocation currentFrame = frameLocations.get(animatedPngState.currentFrameIndex);
         ResourceLocation textureId = PNGTextureManager.getOrCreateTexture(currentFrame);

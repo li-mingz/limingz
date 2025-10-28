@@ -30,6 +30,12 @@ import java.util.Map;
 public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity, AnimatedPngHolder {
     // 存储每个组件的独立状态（key：组件id，value：状态）
     private final Map<String, AnimatedPngState> componentStates = new HashMap<>();
+    private AnimatedPngState aside_closeAnimatedPng = new AnimatedPngState();
+    private AnimatedPngState iconAnimatedPng = new AnimatedPngState();
+    private AnimatedPngState iconCloseAnimatedPng = new AnimatedPngState();
+    private AnimatedPngState centerAnimatedPng = new AnimatedPngState();
+
+
     protected static final RawAnimation OPEN_AND_CLOSE_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.open_and_close");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -52,9 +58,15 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
         // 初始化AnimatedPng状态
-        componentStates.put("aside_closeAnimatedPng", new AnimatedPngState());
-        componentStates.put("iconAnimatedPng", new AnimatedPngState().setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE));
-        componentStates.put("centerAnimatedPng", new AnimatedPngState());
+        iconAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
+        iconCloseAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
+
+        iconAnimatedPng.setShowState(false);
+
+        componentStates.put("aside_closeAnimatedPng", aside_closeAnimatedPng);
+        componentStates.put("iconAnimatedPng", iconAnimatedPng);
+        componentStates.put("iconCloseAnimatedPng", iconCloseAnimatedPng);
+        componentStates.put("centerAnimatedPng", centerAnimatedPng);
     }
 
     @Override
@@ -67,9 +79,15 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         if (doorState == DoorState.CLOSED || doorState == DoorState.CLOSING) {
             // 如果是关门状态或正在关门，改为开门
             doorState = DoorState.OPENING;
+            iconAnimatedPng.setShowState(true);
+            iconAnimatedPng.resetAnimation();
+            iconCloseAnimatedPng.setShowState(false);
         } else if (doorState == DoorState.OPENED || doorState == DoorState.OPENING) {
             // 如果是开门状态或正在开门，改为关门
             doorState = DoorState.CLOSING;
+            iconCloseAnimatedPng.setShowState(true);
+            iconCloseAnimatedPng.resetAnimation();
+            iconAnimatedPng.setShowState(false);
         }
         // 同步数据到客户端
         setChanged();
@@ -173,6 +191,15 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         super.saveAdditional(tag);
         tag.putString("doorState", doorState.name());
         tag.putDouble("animationTick", animationTick);
+
+        // 保存所有AnimatedPngState
+        CompoundTag componentsTag = new CompoundTag();
+        for (Map.Entry<String, AnimatedPngState> entry : componentStates.entrySet()) {
+            String componentId = entry.getKey();
+            AnimatedPngState state = entry.getValue();
+            componentsTag.put(componentId, state.saveToTag()); // 每个组件状态存入子标签
+        }
+        tag.put("componentStates", componentsTag);
     }
 
     @Override
@@ -181,6 +208,16 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         doorState = DoorState.valueOf(tag.getString("doorState"));
         animationTick = tag.getDouble("animationTick");
         needLoadTick = true;
+
+        // 加载所有AnimatedPngState
+        CompoundTag componentsTag = tag.getCompound("componentStates");
+        componentStates.clear(); // 先清空现有数据
+        for (String componentId : componentsTag.getAllKeys()) {
+            CompoundTag stateTag = componentsTag.getCompound(componentId);
+            AnimatedPngState state = new AnimatedPngState();
+            state.loadFromTag(stateTag); // 从标签恢复状态
+            componentStates.put(componentId, state);
+        }
     }
 
     @Override
