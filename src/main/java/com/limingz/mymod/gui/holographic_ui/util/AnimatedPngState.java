@@ -117,6 +117,7 @@ public class AnimatedPngState {
         tag.putInt("currentFrameIndex", currentFrameIndex);
         tag.putInt("direction", direction);
         tag.putBoolean("isPlaying", isPlaying);
+        tag.putBoolean("show", show);
         return tag;
     }
 
@@ -132,5 +133,6 @@ public class AnimatedPngState {
         this.direction = tag.getInt("direction");
         if (this.direction == 0) this.direction = 1; // 防止方向为0的无效值
         this.isPlaying = tag.getBoolean("isPlaying");
+        this.show = tag.getBoolean("show");
     }
 }
