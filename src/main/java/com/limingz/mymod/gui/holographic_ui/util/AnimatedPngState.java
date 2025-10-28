@@ -84,6 +84,10 @@ public class AnimatedPngState {
      */
     public void setPlayMode(PlayMode playMode) {
         this.playMode = playMode;
+        // 切换到循环动画则取消暂停
+        if(playMode == PlayMode.LOOP){
+            isPlaying = true;
+        }
     }
 
     /**

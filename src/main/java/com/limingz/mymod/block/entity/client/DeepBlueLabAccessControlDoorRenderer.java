@@ -15,6 +15,8 @@ import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
 public class DeepBlueLabAccessControlDoorRenderer extends GeoBlockRenderer<DeepBlueLabAccessControlDoorEntity> {
     private AnimatedPng aside_closeAnimatedPng;
+    private AnimatedPng aside_openAnimatedPng;
+    private AnimatedPng aside_ro_openAnimatedPng;
     private AnimatedPng iconAnimatedPng;
     private AnimatedPng iconCloseAnimatedPng;
     private AnimatedPng centerAnimatedPng;
@@ -27,6 +29,8 @@ public class DeepBlueLabAccessControlDoorRenderer extends GeoBlockRenderer<DeepB
         png1 = new PNG("otherPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/other/other_00000.png");
         png2 = new PNG("otherPng2", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/other2/other2_00000.png");
         aside_closeAnimatedPng = new AnimatedPng("aside_closeAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside_close", 30);
+        aside_openAnimatedPng = new AnimatedPng("aside_openAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside_open", 30);
+        aside_ro_openAnimatedPng = new AnimatedPng("aside_ro_openAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside_ro_open", 30);
         iconAnimatedPng = new AnimatedPng("iconAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/icon", 30);
         iconCloseAnimatedPng = new AnimatedPng("iconCloseAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/icon_close", 30);
         centerAnimatedPng = new AnimatedPng("centerAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/center", 30);
@@ -49,6 +53,8 @@ public class DeepBlueLabAccessControlDoorRenderer extends GeoBlockRenderer<DeepB
         // 前移0.1格
         poseStack.translate(0, 0, 0.1);
         aside_closeAnimatedPng.renderAll(bufferSource, poseStack, packedOverlay, animatable);
+        aside_openAnimatedPng.renderAll(bufferSource, poseStack, packedOverlay, animatable);
+        aside_ro_openAnimatedPng.renderAll(bufferSource, poseStack, packedOverlay, animatable);
         iconAnimatedPng.renderAll(bufferSource, poseStack, packedOverlay, animatable);
         iconCloseAnimatedPng.renderAll(bufferSource, poseStack, packedOverlay, animatable);
         png2.renderAll(bufferSource, poseStack, packedOverlay, animatable);

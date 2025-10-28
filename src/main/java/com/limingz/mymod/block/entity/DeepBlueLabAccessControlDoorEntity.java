@@ -31,6 +31,8 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     // 存储每个组件的独立状态（key：组件id，value：状态）
     private final Map<String, AnimatedPngState> componentStates = new HashMap<>();
     private AnimatedPngState aside_closeAnimatedPng = new AnimatedPngState();
+    private AnimatedPngState aside_openAnimatedPng = new AnimatedPngState();
+    private AnimatedPngState aside_ro_openAnimatedPng = new AnimatedPngState();
     private AnimatedPngState iconAnimatedPng = new AnimatedPngState();
     private AnimatedPngState iconCloseAnimatedPng = new AnimatedPngState();
     private AnimatedPngState centerAnimatedPng = new AnimatedPngState();
@@ -60,10 +62,16 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         // 初始化AnimatedPng状态
         iconAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
         iconCloseAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
+        aside_openAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
+        aside_ro_openAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
 
         iconAnimatedPng.setShowState(false);
+        aside_closeAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.setShowState(false);
 
         componentStates.put("aside_closeAnimatedPng", aside_closeAnimatedPng);
+        componentStates.put("aside_openAnimatedPng", aside_openAnimatedPng);
+        componentStates.put("aside_ro_openAnimatedPng", aside_ro_openAnimatedPng);
         componentStates.put("iconAnimatedPng", iconAnimatedPng);
         componentStates.put("iconCloseAnimatedPng", iconCloseAnimatedPng);
         componentStates.put("centerAnimatedPng", centerAnimatedPng);
