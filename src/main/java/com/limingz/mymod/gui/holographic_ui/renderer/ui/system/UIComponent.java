@@ -17,7 +17,7 @@ public abstract class UIComponent {
     protected boolean canClick = true; // 是否可被点击
     protected int light = LightTexture.pack(15,15);
     private UIComponent parent; // 父组件引用
-    private String id; // 唯一标识符
+    protected String id; // 唯一标识符
     protected final List<UIComponent> children = new ArrayList<>(); // 子类列表
 
     public UIComponent(String id, float x, float y, float width, float height) {

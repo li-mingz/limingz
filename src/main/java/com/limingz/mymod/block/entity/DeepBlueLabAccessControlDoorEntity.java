@@ -1,5 +1,7 @@
 package com.limingz.mymod.block.entity;
 
+import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
+import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
 import com.limingz.mymod.mixins_access.AnimationControllerAccess;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
@@ -22,10 +24,16 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity {
+import java.util.HashMap;
+import java.util.Map;
+
+public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity, AnimatedPngHolder {
+    // 存储每个组件的独立状态（key：组件id，value：状态）
+    private final Map<String, AnimatedPngState> componentStates = new HashMap<>();
     protected static final RawAnimation OPEN_AND_CLOSE_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.open_and_close");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
     // 门的状态
     private enum DoorState {
         OPENED,
@@ -43,6 +51,15 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
 
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
+        // 初始化AnimatedPng状态
+        componentStates.put("aside_closeAnimatedPng", new AnimatedPngState());
+        componentStates.put("iconAnimatedPng", new AnimatedPngState().setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE));
+        componentStates.put("centerAnimatedPng", new AnimatedPngState());
+    }
+
+    @Override
+    public Map<String, AnimatedPngState> getAnimatedState() {
+        return componentStates;
     }
 
     // 切换门的状态

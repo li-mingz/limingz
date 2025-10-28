@@ -1,5 +1,6 @@
 package com.limingz.mymod.gui.holographic_ui.renderer.ui.system;
 
+import com.limingz.mymod.Main;
 import com.limingz.mymod.util.pacture.PNGTextureManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -12,9 +13,9 @@ public class PNG extends UIComponent{
 
     // 资源路径
     private ResourceLocation PNG_LOCATION;
-    public PNG(String id, float x, float y, float width, float height, ResourceLocation resourceLocation) {
+    public PNG(String id, float x, float y, float width, float height, String path) {
         super(id, x, y, width, height);
-        PNG_LOCATION = resourceLocation;
+        PNG_LOCATION =  ResourceLocation.fromNamespaceAndPath(Main.MODID, path);
     }
     @Override
     public void render(MultiBufferSource bufferSource, PoseStack poseStack, int combinedOverlay, float x, float y, BlockEntity blockEntity) {

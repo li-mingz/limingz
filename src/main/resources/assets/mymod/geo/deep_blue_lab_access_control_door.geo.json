@@ -18,17 +18,17 @@
 				{
 					"name": "left",
 					"parent": "root",
-					"pivot": [28, 48, 0],
+					"pivot": [20, 48, 0],
 					"cubes": [
-						{"origin": [0, 0, -3], "size": [56, 96, 6], "uv": [0, 102]}
+						{"origin": [0, 0, -3], "size": [40, 96, 6], "uv": [0, 0]}
 					]
 				},
 				{
 					"name": "right",
 					"parent": "root",
-					"pivot": [-28, 48, 0],
+					"pivot": [-20, 48, 0],
 					"cubes": [
-						{"origin": [-56, 0, -3], "size": [56, 96, 6], "uv": [0, 0]}
+						{"origin": [-40, 0, -3], "size": [40, 96, 6], "uv": [92, 0]}
 					]
 				}
 			]

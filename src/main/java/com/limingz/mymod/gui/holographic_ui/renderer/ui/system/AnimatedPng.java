@@ -1,67 +1,188 @@
 package com.limingz.mymod.gui.holographic_ui.renderer.ui.system;
 
 import com.limingz.mymod.Main;
+import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
+import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
 import com.limingz.mymod.util.PauseTick;
 import com.limingz.mymod.util.pacture.PNGTextureManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import software.bernie.geckolib.util.RenderUtils;
+
+import java.util.*;
 
 public class AnimatedPng extends UIComponent {
-    private ResourceLocation pngLocation;
-    private String path;
-    private int num = 0;
-    private int maxNum;
-    private final int fps; // 目标帧率
-    private final double frameInterval; // 每帧持续的刻数 = 20.0 / fps（1秒=20刻）
-    private double lastFrameTick; // 上一次切换帧的刻数
+    private final String folderPath;
+    private final int fps;
+    private final double frameInterval;
+    private List<ResourceLocation> frameLocations = new ArrayList<>();
+    private boolean framesLoaded = false;
+//    private double lastFrameTick;
+//    private int currentFrameIndex = 0;
+//    private int direction = 1; // 1: 正向播放, -1: 反向播放
+//    private boolean isPlaying = true; // 动画是否正在播放
 
-    public AnimatedPng(String id, float x, float y, float width, float height, String path, int maxNum, int fps) {
+    public AnimatedPng(String id, float x, float y, float width, float height, String folderPath, int fps) {
         super(id, x, y, width, height);
-        this.path = path;
-        this.maxNum = maxNum-1;
+        this.id = id;
+        this.folderPath = folderPath;
         this.fps = fps;
-        this.frameInterval = 20.0 / fps; // 计算每帧持续的刻数（1秒=20刻）
-        this.lastFrameTick = PauseTick.getTick(); // 初始时间设为当前刻数
-        // 初始化图片位置（暂时为空，后续动态更新）
-        pngLocation = ResourceLocation.fromNamespaceAndPath(Main.MODID, "");
+        this.frameInterval = 20.0 / fps;
     }
+
+    /**
+     * 加载文件夹中的所有帧并按文件名升序排序
+     */
+    private void loadFrames() {
+        frameLocations.clear();
+        ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+
+        // 遍历指定文件夹下的所有PNG文件
+        resourceManager.listResources(folderPath, location ->
+                location.getPath().toLowerCase().endsWith(".png")
+        ).forEach((resourceLocation, resource) -> {
+            frameLocations.add(resourceLocation);
+        });
+
+        // 按文件名升序排序
+        Collections.sort(frameLocations, Comparator.comparing(
+                loc -> loc.getPath().substring(loc.getPath().lastIndexOf("/") + 1)
+        ));
+
+        Main.LOGGER.info("加载 {} 个帧 从 {}", frameLocations.size(), folderPath);
+        framesLoaded = true;
+    }
+//
+//    /**
+//     * 设置播放方向
+//     * @param direction 1为正向播放, -1为反向播放
+//     */
+//    public void setDirection(int direction) {
+//        this.direction = direction > 0 ? 1 : -1;
+//    }
+//
+//    /**
+//     * 获取当前播放方向
+//     * @return 1为正向, -1为反向
+//     */
+//    public int getDirection() {
+//        return direction;
+//    }
+//
+//    /**
+//     * 设置当前播放帧
+//     */
+//    public void setFrame(int frame) {
+//        currentFrameIndex = frame;
+//    }
+//
+//    /**
+//     * 将当前播放帧设置为起始帧
+//     */
+//    public void playStartFrame() {
+//        currentFrameIndex = 0;
+//    }
+//
+//    /**
+//     * 将当前播放帧设置为终止帧
+//     */
+//    public void playEndFrame() {
+//        currentFrameIndex = frameLocations.size()-1;
+//    }
+//
+//    /**
+//     * 重置动画（从当前方向的起始帧重新开始）
+//     */
+//    public void resetAnimation() {
+//        if (direction == 1) {
+//            currentFrameIndex = 0;
+//        } else {
+//            currentFrameIndex = frameLocations.size() - 1;
+//        }
+//        lastFrameTick = PauseTick.getTick();
+//        isPlaying = true;
+//    }
+//
+//    /**
+//     * 设置播放模式
+//     */
+//    public void setPlayMode(PlayMode mode) {
+//       playMode = mode;
+//    }
+//
+//    /**
+//     * 设置上一帧渲染的时间，用于跳帧
+//     */
+//    public void setLastFrameTick(double time) {
+//        lastFrameTick = time;
+//    }
+
     @Override
     public void render(MultiBufferSource bufferSource, PoseStack poseStack, int combinedOverlay, float x, float y, BlockEntity blockEntity) {
         super.render(bufferSource, poseStack, combinedOverlay, x, y, blockEntity);
-        // 获取当前游戏刻数
-        double currentTick = PauseTick.getTick();
-        double timeElapsed = currentTick - lastFrameTick; // 时间差（刻）
 
-        // 判断是否需要切换帧（支持累积刻数差）
-        if (timeElapsed >= frameInterval) {
-            int framesToAdvance = (int) (timeElapsed / frameInterval); // 需前进的帧数
-            num = (num + framesToAdvance) % maxNum; // 循环切换帧
-            lastFrameTick += framesToAdvance * frameInterval; // 更新上一帧刻数
+        // 懒加载， 首次渲染时加载帧资源
+        if (!framesLoaded) {
+            loadFrames();
         }
 
+        // 没有帧资源则不渲染
+        if (frameLocations.isEmpty()) {
+            return;
+        }
+        Map<String, AnimatedPngState> animatedPngStateMap = ((AnimatedPngHolder)blockEntity).getAnimatedState();
+        AnimatedPngState animatedPngState = animatedPngStateMap.get(this.id);
+        double currentTick = PauseTick.getTick();
+        double timeElapsed = currentTick - animatedPngState.lastFrameTick;
 
-        // 格式化：不足5位前面补0，超过5位则保留原数字
-        String intResult = String.format("%05d", num);
-        pngLocation = ResourceLocation.fromNamespaceAndPath(Main.MODID, path+intResult+".png");
-        // 获取SVG纹理
-        ResourceLocation textureId = PNGTextureManager.getOrCreateTexture(pngLocation);
+        // 计算需要推进的帧数(仅播放时)
+        if (animatedPngState.isPlaying && timeElapsed >= frameInterval) {
+            int framesToAdvance = (int) (timeElapsed / frameInterval);
+            int frameCount = frameLocations.size();
 
+            // 根据播放方向更新帧索引
+            animatedPngState.currentFrameIndex += animatedPngState.direction * framesToAdvance;
+
+            // 处理循环逻辑（确保索引在有效范围内循环）
+            int newFrameIndex = (animatedPngState.currentFrameIndex % frameCount + frameCount) % frameCount;
+
+            // 根据播放模式处理帧索引
+            if (animatedPngState.playMode == AnimatedPngState.PlayMode.PLAY_ONCE) {
+                // 正向播放
+                if (animatedPngState.direction == 1 && newFrameIndex < animatedPngState.currentFrameIndex) {
+                    animatedPngState.currentFrameIndex = frameLocations.size()-1;
+                    animatedPngState.isPlaying = false; // 停止播放
+                // 反向播放
+                } else if(animatedPngState.direction == -1 && newFrameIndex > animatedPngState.currentFrameIndex) {
+                    animatedPngState.currentFrameIndex = 0;
+                    animatedPngState.isPlaying = false; // 停止播放
+                } else {
+                    animatedPngState.currentFrameIndex = newFrameIndex;
+                }
+            } else { // 循环播放模式
+                animatedPngState.currentFrameIndex = newFrameIndex;
+            }
+
+            animatedPngState.lastFrameTick += framesToAdvance * frameInterval;
+        }
+
+        // 获取当前帧的纹理
+        ResourceLocation currentFrame = frameLocations.get(animatedPngState.currentFrameIndex);
+        ResourceLocation textureId = PNGTextureManager.getOrCreateTexture(currentFrame);
+
+        // 绘制当前帧
         poseStack.pushPose();
-        // 获取顶点消费者
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(
-                RenderType.entityTranslucent(textureId) // 支持透明的渲染类型
-        );
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(textureId));
 
-        // 绘制矩形
         float halfW = width / 2.0f;
         float halfH = height / 2.0f;
-
         UIRender.renderVerticalRectangle(vertexConsumer, poseStack, -halfW, halfW, halfH, -halfH, light, combinedOverlay);
+
         poseStack.popPose();
     }
 }

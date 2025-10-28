@@ -11,7 +11,7 @@
 							"vector": [0, 0, 0]
 						},
 						"15.0": {
-							"vector": [56, 0, 0],
+							"vector": [40, 0, 0],
 							"easing": "easeInOutQuad"
 						},
 						"30.0": {
@@ -26,7 +26,7 @@
 							"vector": [0, 0, 0]
 						},
 						"15.0": {
-							"vector": [-56, 0, 0],
+							"vector": [-40, 0, 0],
 							"easing": "easeInOutQuad"
 						},
 						"30.0": {
