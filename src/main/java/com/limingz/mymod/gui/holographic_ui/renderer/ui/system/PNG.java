@@ -1,6 +1,9 @@
 package com.limingz.mymod.gui.holographic_ui.renderer.ui.system;
 
 import com.limingz.mymod.Main;
+import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
+import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
+import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.util.pacture.PNGTextureManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -8,6 +11,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.Map;
 
 public class PNG extends UIComponent{
 
@@ -20,6 +25,14 @@ public class PNG extends UIComponent{
     @Override
     public void render(MultiBufferSource bufferSource, PoseStack poseStack, int combinedOverlay, float x, float y, BlockEntity blockEntity) {
         super.render(bufferSource, poseStack, combinedOverlay, x, y, blockEntity);
+
+        Map<String, PngState> pngStateMap = ((AnimatedPngHolder)blockEntity).getPngState();
+        if(pngStateMap.containsKey(this.id)){
+            PngState pngState = pngStateMap.get(this.id);
+            // 跳过不渲染的
+            if(!pngState.show) return;
+        }
+
         // 获取SVG纹理
         ResourceLocation textureId = PNGTextureManager.getOrCreateTexture(PNG_LOCATION);
 

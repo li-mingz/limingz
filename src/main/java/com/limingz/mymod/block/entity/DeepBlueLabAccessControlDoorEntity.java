@@ -2,6 +2,7 @@ package com.limingz.mymod.block.entity;
 
 import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
 import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
+import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.mixins_access.AnimationControllerAccess;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
@@ -30,12 +31,15 @@ import java.util.Map;
 public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity, AnimatedPngHolder {
     // 存储每个组件的独立状态（key：组件id，value：状态）
     private final Map<String, AnimatedPngState> componentStates = new HashMap<>();
+    private final Map<String, PngState> pngStates = new HashMap<>();
     private AnimatedPngState aside_closeAnimatedPng = new AnimatedPngState();
     private AnimatedPngState aside_openAnimatedPng = new AnimatedPngState();
     private AnimatedPngState aside_ro_openAnimatedPng = new AnimatedPngState();
     private AnimatedPngState iconAnimatedPng = new AnimatedPngState();
     private AnimatedPngState iconCloseAnimatedPng = new AnimatedPngState();
     private AnimatedPngState centerAnimatedPng = new AnimatedPngState();
+
+    private PngState asidePng = new PngState();
 
 
     protected static final RawAnimation OPEN_AND_CLOSE_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.open_and_close");
@@ -62,10 +66,10 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         // 初始化AnimatedPng状态
         iconAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
         iconCloseAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
-        aside_openAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
         aside_ro_openAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
 
         iconAnimatedPng.setShowState(false);
+        aside_openAnimatedPng.setShowState(false);
         aside_closeAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.setShowState(false);
 
@@ -75,11 +79,18 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         componentStates.put("iconAnimatedPng", iconAnimatedPng);
         componentStates.put("iconCloseAnimatedPng", iconCloseAnimatedPng);
         componentStates.put("centerAnimatedPng", centerAnimatedPng);
+
+        pngStates.put("asidePng", asidePng);
     }
 
     @Override
     public Map<String, AnimatedPngState> getAnimatedState() {
         return componentStates;
+    }
+
+    @Override
+    public Map<String, PngState> getPngState() {
+        return pngStates;
     }
 
     // 切换门的状态
@@ -90,12 +101,31 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             iconAnimatedPng.setShowState(true);
             iconAnimatedPng.resetAnimation();
             iconCloseAnimatedPng.setShowState(false);
+
+            asidePng.setShowState(false);
+            aside_ro_openAnimatedPng.setShowState(true);
+            aside_ro_openAnimatedPng.setDirection(1);
+            aside_ro_openAnimatedPng.resetAnimation();
+            aside_ro_openAnimatedPng.setOnPlayOnceFinished(end -> {
+                aside_ro_openAnimatedPng.setShowState(false);
+                aside_openAnimatedPng.setShowState(true);
+            });
         } else if (doorState == DoorState.OPENED || doorState == DoorState.OPENING) {
             // 如果是开门状态或正在开门，改为关门
             doorState = DoorState.CLOSING;
             iconCloseAnimatedPng.setShowState(true);
             iconCloseAnimatedPng.resetAnimation();
             iconAnimatedPng.setShowState(false);
+
+
+            asidePng.setShowState(false);
+            aside_ro_openAnimatedPng.setShowState(true);
+            aside_ro_openAnimatedPng.setDirection(-1);
+            aside_ro_openAnimatedPng.resetAnimation();
+            aside_ro_openAnimatedPng.setOnPlayOnceFinished(end -> {
+                aside_ro_openAnimatedPng.setShowState(false);
+                aside_closeAnimatedPng.setShowState(true);
+            });
         }
         // 同步数据到客户端
         setChanged();
@@ -208,6 +238,14 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             componentsTag.put(componentId, state.saveToTag()); // 每个组件状态存入子标签
         }
         tag.put("componentStates", componentsTag);
+        // 保存所有pngState
+        CompoundTag pngComponentsTag = new CompoundTag();
+        for (Map.Entry<String, PngState> entry : pngStates.entrySet()) {
+            String componentId = entry.getKey();
+            PngState state = entry.getValue();
+            pngComponentsTag.put(componentId, state.saveToTag()); // 每个组件状态存入子标签
+        }
+        tag.put("pngStates", pngComponentsTag);
     }
 
     @Override
@@ -225,6 +263,15 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             AnimatedPngState state = new AnimatedPngState();
             state.loadFromTag(stateTag); // 从标签恢复状态
             componentStates.put(componentId, state);
+        }
+        // 加载所有PngState
+        CompoundTag pngComponentsTag = tag.getCompound("pngStates");
+        pngStates.clear(); // 先清空现有数据
+        for (String componentId : pngComponentsTag.getAllKeys()) {
+            CompoundTag stateTag = pngComponentsTag.getCompound(componentId);
+            PngState state = new PngState();
+            state.loadFromTag(stateTag); // 从标签恢复状态
+            pngStates.put(componentId, state);
         }
     }
 

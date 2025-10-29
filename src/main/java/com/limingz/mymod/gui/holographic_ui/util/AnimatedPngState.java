@@ -1,10 +1,19 @@
 package com.limingz.mymod.gui.holographic_ui.util;
 
+import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.nbt.CompoundTag;
 
 // 单个AnimatedPng组件的独立状态
 public class AnimatedPngState {
+    // 定义单次播放结束回调接口
+    @FunctionalInterface
+    public interface OnPlayOnceFinished {
+        void onFinished(AnimatedPng animatedPng);
+    }
+    // 回调函数实例
+    public OnPlayOnceFinished onPlayOnceFinished;
+
     // 播放模式
     public enum PlayMode {
         LOOP,       // 循环播放
@@ -31,6 +40,12 @@ public class AnimatedPngState {
     }
 
 
+    /**
+     * 设置单次播放结束后的回调函数
+     */
+    public void setOnPlayOnceFinished(OnPlayOnceFinished callback) {
+        this.onPlayOnceFinished = callback;
+    }
 
 
     /**

@@ -97,10 +97,18 @@ public class AnimatedPng extends UIComponent {
                 if (animatedPngState.direction == 1 && newFrameIndex < animatedPngState.currentFrameIndex) {
                     animatedPngState.currentFrameIndex = frameLocations.size()-1;
                     animatedPngState.isPlaying = false; // 停止播放
+                    // 触发回调函数
+                    if (animatedPngState.onPlayOnceFinished != null) {
+                        animatedPngState.onPlayOnceFinished.onFinished(this);
+                    }
                 // 反向播放
                 } else if(animatedPngState.direction == -1 && newFrameIndex > animatedPngState.currentFrameIndex) {
                     animatedPngState.currentFrameIndex = 0;
                     animatedPngState.isPlaying = false; // 停止播放
+                    // 触发回调函数
+                    if (animatedPngState.onPlayOnceFinished != null) {
+                        animatedPngState.onPlayOnceFinished.onFinished(this);
+                    }
                 } else {
                     animatedPngState.currentFrameIndex = newFrameIndex;
                 }
