@@ -1,6 +1,8 @@
 package com.limingz.mymod.block.entity;
 
+import com.limingz.mymod.Main;
 import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
+import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
 import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
 import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.mixins_access.AnimationControllerAccess;
@@ -16,6 +18,9 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.loading.FMLLoader;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -42,17 +47,22 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     private PngState asidePng = new PngState();
 
 
+    // 回调函数实例Map
+    public Map<String, AnimatedPngState.OnPlayOnceFinished> onPlayOnceFinishedMap;
+
+
     protected static final RawAnimation OPEN_AND_CLOSE_ANIM = RawAnimation.begin().thenPlay("animation.deep_blue_lab_access_control_door.open_and_close");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     // 门的状态
-    private enum DoorState {
+    public enum DoorState {
         OPENED,
         CLOSED,
         OPENING,
         CLOSING
     }
+
     private DoorState doorState = DoorState.CLOSED;
     // 当前动画的帧数
     private double animationTick = 0;
@@ -63,6 +73,8 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
 
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
+        onPlayOnceFinishedMap =  new HashMap<>();
+
         // 初始化AnimatedPng状态
         iconAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
         iconCloseAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
@@ -81,8 +93,91 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         componentStates.put("centerAnimatedPng", centerAnimatedPng);
 
         pngStates.put("asidePng", asidePng);
+
+
+        this.onPlayOnceFinishedMap.put("doorOpened", end -> {
+            aside_openAnimatedPng.resetAnimation();
+            aside_openAnimatedPng.setShowState(true);
+            aside_ro_openAnimatedPng.setShowState(false);
+        });
+        this.onPlayOnceFinishedMap.put("doorClosed", end -> {
+            aside_closeAnimatedPng.resetAnimation();
+            aside_closeAnimatedPng.setShowState(true);
+            aside_ro_openAnimatedPng.setShowState(false);
+        });
     }
 
+
+    /**
+     * 执行单次播放结束后调用的回调函数
+     */
+    public void executeOnPlayOnceFinishedCallback(String targetId, AnimatedPng animatedPng) {
+        AnimatedPngState target = componentStates.get(targetId);
+        while (!target.onPlayOnceFinishedExecuteList.isEmpty()){
+            onPlayOnceFinishedMap.get(target.onPlayOnceFinishedExecuteList.pop()).onFinished(animatedPng);
+        }
+    }
+
+    private void doorOpeningAnimate(){
+        iconAnimatedPng.setShowState(true);
+        iconAnimatedPng.resetAnimation();
+        iconCloseAnimatedPng.setShowState(false);
+
+        asidePng.setShowState(false);
+        aside_closeAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.setShowState(true);
+        aside_ro_openAnimatedPng.setDirection(1);
+        aside_ro_openAnimatedPng.resetAnimation();
+        aside_ro_openAnimatedPng.clearOnPlayOnceFinishedExecuteList();
+        aside_ro_openAnimatedPng.addOnPlayOnceFinishedExecuteName("doorOpened");
+    }
+    private void doorClosingAnimate(){
+        iconCloseAnimatedPng.setShowState(true);
+        iconCloseAnimatedPng.resetAnimation();
+        iconAnimatedPng.setShowState(false);
+
+        asidePng.setShowState(false);
+        aside_openAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.setShowState(true);
+        aside_ro_openAnimatedPng.setDirection(-1);
+        aside_ro_openAnimatedPng.resetAnimation();
+        aside_ro_openAnimatedPng.clearOnPlayOnceFinishedExecuteList();
+        aside_ro_openAnimatedPng.addOnPlayOnceFinishedExecuteName("doorClosed");
+    }
+    private void doorClosedAnimate(){
+        iconCloseAnimatedPng.setShowState(true);
+        iconCloseAnimatedPng.playEndFrame();
+        iconAnimatedPng.setShowState(false);
+
+        asidePng.setShowState(true);
+        aside_openAnimatedPng.setShowState(false);
+        aside_closeAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.clearOnPlayOnceFinishedExecuteList();
+    }
+    private void doorOpenedAnimate(){
+        iconAnimatedPng.setShowState(true);
+        iconAnimatedPng.playEndFrame();
+        iconCloseAnimatedPng.setShowState(false);
+
+        asidePng.setShowState(false);
+        aside_openAnimatedPng.setShowState(true);
+        aside_openAnimatedPng.playEndFrame();
+        aside_closeAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.setShowState(false);
+        aside_ro_openAnimatedPng.clearOnPlayOnceFinishedExecuteList();
+    }
+    private void switchDoorState(){
+        if (doorState == DoorState.CLOSING) {
+            doorClosingAnimate();
+        } else if (doorState == DoorState.OPENING) {
+            doorOpeningAnimate();
+        } else if (doorState == DoorState.OPENED) {
+            doorOpenedAnimate();
+        } else {
+            doorClosedAnimate();
+        }
+    }
     @Override
     public Map<String, AnimatedPngState> getAnimatedState() {
         return componentStates;
@@ -93,39 +188,17 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         return pngStates;
     }
 
+
     // 切换门的状态
     public void toggleDoor() {
         if (doorState == DoorState.CLOSED || doorState == DoorState.CLOSING) {
             // 如果是关门状态或正在关门，改为开门
             doorState = DoorState.OPENING;
-            iconAnimatedPng.setShowState(true);
-            iconAnimatedPng.resetAnimation();
-            iconCloseAnimatedPng.setShowState(false);
-
-            asidePng.setShowState(false);
-            aside_ro_openAnimatedPng.setShowState(true);
-            aside_ro_openAnimatedPng.setDirection(1);
-            aside_ro_openAnimatedPng.resetAnimation();
-            aside_ro_openAnimatedPng.setOnPlayOnceFinished(end -> {
-                aside_ro_openAnimatedPng.setShowState(false);
-                aside_openAnimatedPng.setShowState(true);
-            });
+            doorOpeningAnimate();
         } else if (doorState == DoorState.OPENED || doorState == DoorState.OPENING) {
             // 如果是开门状态或正在开门，改为关门
             doorState = DoorState.CLOSING;
-            iconCloseAnimatedPng.setShowState(true);
-            iconCloseAnimatedPng.resetAnimation();
-            iconAnimatedPng.setShowState(false);
-
-
-            asidePng.setShowState(false);
-            aside_ro_openAnimatedPng.setShowState(true);
-            aside_ro_openAnimatedPng.setDirection(-1);
-            aside_ro_openAnimatedPng.resetAnimation();
-            aside_ro_openAnimatedPng.setOnPlayOnceFinished(end -> {
-                aside_ro_openAnimatedPng.setShowState(false);
-                aside_closeAnimatedPng.setShowState(true);
-            });
+            doorClosingAnimate();
         }
         // 同步数据到客户端
         setChanged();
@@ -142,7 +215,6 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         controllers.add(animationController);
     }
     protected PlayState doorAnimController(final AnimationState<DeepBlueLabAccessControlDoorEntity> state) {
-
         AnimationController<DeepBlueLabAccessControlDoorEntity> controller = state.getController();
         AnimationControllerAccess animationControllerAccess = (AnimationControllerAccess) controller;
         Minecraft mc = Minecraft.getInstance();
@@ -172,11 +244,13 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
                 if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
                     doorState = DoorState.OPENED;
                     // 同步开门状态
-                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength/2));
+                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength/2, doorState));
+                    switchDoorState();
                 } else if(doorState == DoorState.CLOSING && animationTick >= animationLength) {
                     doorState = DoorState.CLOSED;
                     // 同步关门状态
-                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength));
+                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength, doorState));
+                    switchDoorState();
                 }
             }
         }
@@ -229,23 +303,6 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         super.saveAdditional(tag);
         tag.putString("doorState", doorState.name());
         tag.putDouble("animationTick", animationTick);
-
-        // 保存所有AnimatedPngState
-        CompoundTag componentsTag = new CompoundTag();
-        for (Map.Entry<String, AnimatedPngState> entry : componentStates.entrySet()) {
-            String componentId = entry.getKey();
-            AnimatedPngState state = entry.getValue();
-            componentsTag.put(componentId, state.saveToTag()); // 每个组件状态存入子标签
-        }
-        tag.put("componentStates", componentsTag);
-        // 保存所有pngState
-        CompoundTag pngComponentsTag = new CompoundTag();
-        for (Map.Entry<String, PngState> entry : pngStates.entrySet()) {
-            String componentId = entry.getKey();
-            PngState state = entry.getValue();
-            pngComponentsTag.put(componentId, state.saveToTag()); // 每个组件状态存入子标签
-        }
-        tag.put("pngStates", pngComponentsTag);
     }
 
     @Override
@@ -254,25 +311,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         doorState = DoorState.valueOf(tag.getString("doorState"));
         animationTick = tag.getDouble("animationTick");
         needLoadTick = true;
-
-        // 加载所有AnimatedPngState
-        CompoundTag componentsTag = tag.getCompound("componentStates");
-        componentStates.clear(); // 先清空现有数据
-        for (String componentId : componentsTag.getAllKeys()) {
-            CompoundTag stateTag = componentsTag.getCompound(componentId);
-            AnimatedPngState state = new AnimatedPngState();
-            state.loadFromTag(stateTag); // 从标签恢复状态
-            componentStates.put(componentId, state);
-        }
-        // 加载所有PngState
-        CompoundTag pngComponentsTag = tag.getCompound("pngStates");
-        pngStates.clear(); // 先清空现有数据
-        for (String componentId : pngComponentsTag.getAllKeys()) {
-            CompoundTag stateTag = pngComponentsTag.getCompound(componentId);
-            PngState state = new PngState();
-            state.loadFromTag(stateTag); // 从标签恢复状态
-            pngStates.put(componentId, state);
-        }
+        switchDoorState();
     }
 
     @Override
@@ -290,4 +329,10 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         return PauseTick.getTick();
     }
 
+    public DoorState getDoorState() {
+        return doorState;
+    }
+    public void setDoorState(DoorState doorState) {
+        this.doorState = doorState;
+    }
 }

@@ -18,15 +18,4 @@ public class PngState {
     public void setShowState(boolean showState) {
         this.show = showState;
     }
-    // 序列化
-    public CompoundTag saveToTag() {
-        CompoundTag tag = new CompoundTag();
-        tag.putBoolean("show", show);
-        return tag;
-    }
-
-    // 反序列化
-    public void loadFromTag(CompoundTag tag) {
-        this.show = tag.getBoolean("show");
-    }
 }

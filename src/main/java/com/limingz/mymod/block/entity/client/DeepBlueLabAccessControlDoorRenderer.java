@@ -29,7 +29,7 @@ public class DeepBlueLabAccessControlDoorRenderer extends GeoBlockRenderer<DeepB
         float height = 1.08f*3.75f;
         png1 = new PNG("otherPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/other/other_00000.png");
         png2 = new PNG("otherPng2", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/other2/other2_00000.png");
-        asidePng = new PNG("asidePng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside/aside_00000.png.png");
+        asidePng = new PNG("asidePng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside/aside_00000.png");
         aside_closeAnimatedPng = new AnimatedPng("aside_closeAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside_close", 30);
         aside_openAnimatedPng = new AnimatedPng("aside_openAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside_open", 30);
         aside_ro_openAnimatedPng = new AnimatedPng("aside_ro_openAnimatedPng", 0, 0, width, height, "png/deep_blue_lab_access_control_door_ui/aside_ro_open", 30);

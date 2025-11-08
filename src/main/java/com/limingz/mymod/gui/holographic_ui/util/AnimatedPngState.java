@@ -3,6 +3,11 @@ package com.limingz.mymod.gui.holographic_ui.util;
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+
+import java.util.*;
 
 // 单个AnimatedPng组件的独立状态
 public class AnimatedPngState {
@@ -11,8 +16,8 @@ public class AnimatedPngState {
     public interface OnPlayOnceFinished {
         void onFinished(AnimatedPng animatedPng);
     }
-    // 回调函数实例
-    public OnPlayOnceFinished onPlayOnceFinished;
+    // 按顺序调用的回调函数列表
+    public LinkedList<String> onPlayOnceFinishedExecuteList;
 
     // 播放模式
     public enum PlayMode {
@@ -37,16 +42,21 @@ public class AnimatedPngState {
         this.direction = 1;
         this.isPlaying = true;
         this.show = true;
+        onPlayOnceFinishedExecuteList = new LinkedList<>();
     }
-
 
     /**
-     * 设置单次播放结束后的回调函数
+     * 清空单次播放结束后调用的回调函数
      */
-    public void setOnPlayOnceFinished(OnPlayOnceFinished callback) {
-        this.onPlayOnceFinished = callback;
+    public void clearOnPlayOnceFinishedExecuteList() {
+        onPlayOnceFinishedExecuteList.clear();
     }
-
+    /**
+     * 添加单次播放结束后调用的回调函数
+     */
+    public void addOnPlayOnceFinishedExecuteName(String id) {
+        onPlayOnceFinishedExecuteList.add(id);
+    }
 
     /**
      * 设置渲染状态
@@ -126,32 +136,5 @@ public class AnimatedPngState {
         lastFrameTick = time;
     }
 
-    // 序列化
-    public CompoundTag saveToTag() {
-        CompoundTag tag = new CompoundTag();
-        // 存储枚举（用名字字符串）
-        tag.putString("playMode", playMode.name());
-        // 存储基本类型
-        tag.putDouble("lastFrameTick", lastFrameTick);
-        tag.putInt("currentFrameIndex", currentFrameIndex);
-        tag.putInt("direction", direction);
-        tag.putBoolean("isPlaying", isPlaying);
-        tag.putBoolean("show", show);
-        return tag;
-    }
 
-    // 反序列化
-    public void loadFromTag(CompoundTag tag) {
-        // 读取枚举
-        this.playMode = tag.contains("playMode")
-                ? PlayMode.valueOf(tag.getString("playMode"))
-                : PlayMode.LOOP;
-        // 读取基本类型
-        this.lastFrameTick = tag.getDouble("lastFrameTick");
-        this.currentFrameIndex = tag.getInt("currentFrameIndex");
-        this.direction = tag.getInt("direction");
-        if (this.direction == 0) this.direction = 1; // 防止方向为0的无效值
-        this.isPlaying = tag.getBoolean("isPlaying");
-        this.show = tag.getBoolean("show");
-    }
 }

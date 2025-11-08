@@ -40,7 +40,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock {
                 // 切换门的状态
                 doorEntity.toggleDoor();
             } else {
-                Channel.INSTANCE.sendToServer(new DoorTickPacket(pos, doorEntity.getAnimationLength()-doorEntity.getAnimationTick()));
+                Channel.INSTANCE.sendToServer(new DoorTickPacket(pos, doorEntity.getAnimationLength()-doorEntity.getAnimationTick(), doorEntity.getDoorState()));
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

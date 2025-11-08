@@ -12,19 +12,22 @@ import java.util.function.Supplier;
 public class DoorTickPacket {
     private final BlockPos blockPos;
     private final Double animationTick;
+    private final DeepBlueLabAccessControlDoorEntity.DoorState doorState;
 
-    public DoorTickPacket(BlockPos blockPos, Double animationTick) {
+    public DoorTickPacket(BlockPos blockPos, Double animationTick, DeepBlueLabAccessControlDoorEntity.DoorState doorState) {
         this.blockPos = blockPos;
         this.animationTick = animationTick;
+        this.doorState = doorState;
     }
 
     public void encode(FriendlyByteBuf buf) {
         buf.writeBlockPos(blockPos);
         buf.writeDouble(animationTick);
+        buf.writeEnum(doorState);
     }
 
     public static DoorTickPacket decode(FriendlyByteBuf buf) {
-        return new DoorTickPacket(buf.readBlockPos(), buf.readDouble());
+        return new DoorTickPacket(buf.readBlockPos(), buf.readDouble(), buf.readEnum(DeepBlueLabAccessControlDoorEntity.DoorState.class));
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -33,6 +36,7 @@ public class DoorTickPacket {
             BlockEntity blockEntity = level.getBlockEntity(blockPos);
             if(blockEntity instanceof DeepBlueLabAccessControlDoorEntity doorEntity){
                 doorEntity.setAnimationTick(animationTick);
+                doorEntity.setDoorState(doorState);
                 doorEntity.setChanged();
             }
         });

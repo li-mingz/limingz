@@ -21,7 +21,6 @@ public class AnimatedPng extends UIComponent {
     private final int fps;
     private final double frameInterval;
     private List<ResourceLocation> frameLocations = new ArrayList<>();
-    private boolean framesLoaded = false;
 //    private double lastFrameTick;
 //    private int currentFrameIndex = 0;
 //    private int direction = 1; // 1: 正向播放, -1: 反向播放
@@ -33,6 +32,7 @@ public class AnimatedPng extends UIComponent {
         this.folderPath = folderPath;
         this.fps = fps;
         this.frameInterval = 20.0 / fps;
+        loadFrames();
     }
 
     /**
@@ -55,23 +55,19 @@ public class AnimatedPng extends UIComponent {
         ));
 
         Main.LOGGER.info("加载 {} 个帧 从 {}", frameLocations.size(), folderPath);
-        framesLoaded = true;
     }
 
     @Override
     public void render(MultiBufferSource bufferSource, PoseStack poseStack, int combinedOverlay, float x, float y, BlockEntity blockEntity) {
         super.render(bufferSource, poseStack, combinedOverlay, x, y, blockEntity);
 
-        // 懒加载， 首次渲染时加载帧资源
-        if (!framesLoaded) {
-            loadFrames();
-        }
+        AnimatedPngHolder animatedPngHolderBlockEntity = (AnimatedPngHolder) blockEntity;
 
         // 没有帧资源则不渲染
         if (frameLocations.isEmpty()) {
             return;
         }
-        Map<String, AnimatedPngState> animatedPngStateMap = ((AnimatedPngHolder)blockEntity).getAnimatedState();
+        Map<String, AnimatedPngState> animatedPngStateMap = animatedPngHolderBlockEntity.getAnimatedState();
         AnimatedPngState animatedPngState = animatedPngStateMap.get(this.id);
         double currentTick = PauseTick.getTick();
         double timeElapsed = currentTick - animatedPngState.lastFrameTick;
@@ -98,17 +94,13 @@ public class AnimatedPng extends UIComponent {
                     animatedPngState.currentFrameIndex = frameLocations.size()-1;
                     animatedPngState.isPlaying = false; // 停止播放
                     // 触发回调函数
-                    if (animatedPngState.onPlayOnceFinished != null) {
-                        animatedPngState.onPlayOnceFinished.onFinished(this);
-                    }
+                    animatedPngHolderBlockEntity.executeOnPlayOnceFinishedCallback(this.id, this);
                 // 反向播放
                 } else if(animatedPngState.direction == -1 && newFrameIndex > animatedPngState.currentFrameIndex) {
                     animatedPngState.currentFrameIndex = 0;
                     animatedPngState.isPlaying = false; // 停止播放
                     // 触发回调函数
-                    if (animatedPngState.onPlayOnceFinished != null) {
-                        animatedPngState.onPlayOnceFinished.onFinished(this);
-                    }
+                    animatedPngHolderBlockEntity.executeOnPlayOnceFinishedCallback(this.id, this);
                 } else {
                     animatedPngState.currentFrameIndex = newFrameIndex;
                 }
