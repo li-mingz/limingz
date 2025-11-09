@@ -1,6 +1,7 @@
 package com.limingz.mymod.block;
 
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
+import com.limingz.mymod.block.entity.DeskBlockEntity;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
@@ -12,9 +13,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
+
 
 public class DeepBlueLabAccessControlDoor extends BaseEntityBlock {
 
@@ -44,5 +48,22 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock {
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    @Override
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+        if (pLevel.isClientSide){
+            return ((pLevel1, pPos, pState1, pBlockEntity) -> {
+                if(pBlockEntity instanceof DeepBlueLabAccessControlDoorEntity deepBlueLabAccessControlDoorEntity){
+                    deepBlueLabAccessControlDoorEntity.clientTick();
+                }
+            });
+        } else {
+            return ((pLevel1, pPos, pState1, pBlockEntity) -> {
+                if(pBlockEntity instanceof DeepBlueLabAccessControlDoorEntity deepBlueLabAccessControlDoorEntity){
+                    deepBlueLabAccessControlDoorEntity.serverTick();
+                }
+            });
+        }
     }
 }

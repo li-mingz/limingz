@@ -1,6 +1,7 @@
 package com.limingz.mymod.block.entity;
 
 import com.limingz.mymod.Main;
+import com.limingz.mymod.block.util.DeepBlueLabAccessControlDoorAutoSensor;
 import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
 import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
@@ -8,6 +9,7 @@ import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.mixins_access.AnimationControllerAccess;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
+import com.limingz.mymod.network.packet.servertoplayer.GetClientTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.client.Minecraft;
@@ -15,9 +17,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -43,6 +48,8 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
 
     private PngState asidePng = new PngState();
     private PngState aside2Png = new PngState();
+
+    private final DeepBlueLabAccessControlDoorAutoSensor autoSensor;
 
 
     // 回调函数实例Map
@@ -72,6 +79,8 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
         onPlayOnceFinishedMap =  new HashMap<>();
+
+        this.autoSensor = new DeepBlueLabAccessControlDoorAutoSensor(this);
 
         // 初始化AnimatedPng状态
         iconAnimatedPng.setPlayMode(AnimatedPngState.PlayMode.PLAY_ONCE);
@@ -180,6 +189,26 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             doorClosedAnimate();
         }
     }
+    public void openDoor(){
+        doorState = DoorState.OPENING;
+        doorOpeningAnimate();
+        // 同步数据到客户端
+        setChanged();
+        if (level != null) {
+            // 立即同步状态
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
+        }
+    }
+    public void closeDoor(){
+        doorState = DoorState.CLOSING;
+        doorClosingAnimate();
+        // 同步数据到客户端
+        setChanged();
+        if (level != null) {
+            // 立即同步状态
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
+        }
+    }
     @Override
     public Map<String, AnimatedPngState> getAnimatedState() {
         return componentStates;
@@ -265,7 +294,18 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         }
         return PlayState.CONTINUE;
     }
+    public void sendNearbyPacketGetClientPacket() {
+        Level level = this.level;
+        if (level == null || level.isClientSide) return; // 仅服务端执行
 
+        ServerLevel serverLevel = (ServerLevel) level;
+        BlockPos blockPos = this.worldPosition;
+        // 创建自定义数据包
+        GetClientTickPacket packet = new GetClientTickPacket(blockPos);
+
+        // 向附近 64 格玩家发送
+        Channel.sendToNearby(packet, blockPos, serverLevel);
+    }
 
 
     public Double getAnimationTick() {
@@ -337,4 +377,13 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     public void setDoorState(DoorState doorState) {
         this.doorState = doorState;
     }
+
+
+    public void clientTick() {
+        autoSensor.handleTick();
+    }
+    public void serverTick() {
+        autoSensor.handleTick();
+    }
+
 }
