@@ -18,9 +18,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLLoader;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -45,6 +42,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     private AnimatedPngState centerAnimatedPng = new AnimatedPngState();
 
     private PngState asidePng = new PngState();
+    private PngState aside2Png = new PngState();
 
 
     // 回调函数实例Map
@@ -93,6 +91,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         componentStates.put("centerAnimatedPng", centerAnimatedPng);
 
         pngStates.put("asidePng", asidePng);
+        pngStates.put("aside2Png", aside2Png);
 
 
         this.onPlayOnceFinishedMap.put("doorOpened", end -> {
@@ -124,6 +123,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         iconCloseAnimatedPng.setShowState(false);
 
         asidePng.setShowState(false);
+        aside2Png.setShowState(false);
         aside_closeAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.setShowState(true);
         aside_ro_openAnimatedPng.setDirection(1);
@@ -137,6 +137,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         iconAnimatedPng.setShowState(false);
 
         asidePng.setShowState(false);
+        aside2Png.setShowState(false);
         aside_openAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.setShowState(true);
         aside_ro_openAnimatedPng.setDirection(-1);
@@ -150,6 +151,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         iconAnimatedPng.setShowState(false);
 
         asidePng.setShowState(true);
+        aside2Png.setShowState(false);
         aside_openAnimatedPng.setShowState(false);
         aside_closeAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.setShowState(false);
@@ -161,8 +163,8 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         iconCloseAnimatedPng.setShowState(false);
 
         asidePng.setShowState(false);
-        aside_openAnimatedPng.setShowState(true);
-        aside_openAnimatedPng.playEndFrame();
+        aside2Png.setShowState(true);
+        aside_openAnimatedPng.setShowState(false);
         aside_closeAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.clearOnPlayOnceFinishedExecuteList();
