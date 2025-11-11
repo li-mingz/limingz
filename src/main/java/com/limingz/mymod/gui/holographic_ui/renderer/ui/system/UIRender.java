@@ -1,6 +1,5 @@
 package com.limingz.mymod.gui.holographic_ui.renderer.ui.system;
 
-import com.limingz.mymod.gui.holographic_ui.config.UIConfig;
 import com.limingz.mymod.gui.holographic_ui.font.NoCuLLFontBufferSource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -8,10 +7,8 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

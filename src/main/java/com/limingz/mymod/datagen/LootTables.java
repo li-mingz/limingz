@@ -1,6 +1,5 @@
 package com.limingz.mymod.datagen;
 
-import com.limingz.mymod.Main;
 import com.limingz.mymod.register.BlockRegister;
 import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.world.level.block.Block;

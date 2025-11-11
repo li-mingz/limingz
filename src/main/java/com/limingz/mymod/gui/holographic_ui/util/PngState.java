@@ -1,9 +1,5 @@
 package com.limingz.mymod.gui.holographic_ui.util;
 
-import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
-import com.limingz.mymod.util.PauseTick;
-import net.minecraft.nbt.CompoundTag;
-
 // 单个AnimatedPng组件的独立状态
 public class PngState {
     public boolean show; // 是否渲染

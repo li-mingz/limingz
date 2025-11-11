@@ -2,12 +2,8 @@ package com.limingz.mymod.gui.holographic_ui.util;
 
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
 import com.limingz.mymod.util.PauseTick;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 
-import java.util.*;
+import java.util.LinkedList;
 
 // 单个AnimatedPng组件的独立状态
 public class AnimatedPngState {

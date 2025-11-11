@@ -1,6 +1,5 @@
 package com.limingz.mymod.gui.container;
 
-import com.limingz.mymod.Main;
 import com.limingz.mymod.block.entity.DeskBlockEntity;
 import com.limingz.mymod.register.BlockRegister;
 import com.limingz.mymod.register.MenuRegister;

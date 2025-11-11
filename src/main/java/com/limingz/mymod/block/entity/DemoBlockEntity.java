@@ -1,6 +1,5 @@
 package com.limingz.mymod.block.entity;
 
-import com.limingz.mymod.Main;
 import com.limingz.mymod.register.BlockEntityRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;

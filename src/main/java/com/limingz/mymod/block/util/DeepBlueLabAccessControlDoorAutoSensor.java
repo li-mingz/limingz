@@ -1,18 +1,25 @@
 package com.limingz.mymod.block.util;
 
+import com.limingz.mymod.block.DeepBlueLabAccessControlDoor;
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
+import com.limingz.mymod.register.ModSoundRegister;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Vector3f;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 深蓝实验室大门门自动感应
@@ -20,7 +27,7 @@ import java.util.List;
 public class DeepBlueLabAccessControlDoorAutoSensor {
     public static final double DETECT_RADIUS = 3.5D; // 玩家检测距离（格）
     public static final int OPEN_DELAY = 20; // 开门延迟（20 tick = 1 秒）
-    public static final int CLOSE_DELAY = 20; // 关门延迟（40 tick = 2 秒）
+    public static final int CLOSE_DELAY = 20; // 关门延迟（20 tick = 1 秒）
     public static final int SYNC_DELAY = 2; // 同步延迟
 
     public static final boolean FORCE_SHOW_PARTICLE = true; // 强制显示调试粒子
@@ -31,6 +38,12 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
     private int openDelayTimer = 0; // 开门延迟计时器
     private int closeDelayTimer = 0; // 关门延迟计时器
     private int particleTimer = 0; // 粒子生成计时器（控制间隔）
+
+    // ==================== 门前方判断区域配置（核心修改）====================
+    public static final double DOOR_FRONT_AREA_WIDTH = 5.0D; // 区域宽度（格）- 覆盖门左右各0.5格
+    public static final double DOOR_FRONT_AREA_DEPTH = 3.0D; // 区域深度（格）- 门前方2格内
+    public static final double DOOR_FRONT_AREA_HEIGHT = 6.0D; // 区域高度（格）- 从门底部向上3格（覆盖玩家身高）
+    public static final DustParticleOptions FRONT_AREA_PARTICLE = new DustParticleOptions(new Vector3f(0.0F, 1.0F, 0.0F), 1.0F); // 前方区域粒子（绿色）
 
     public DeepBlueLabAccessControlDoorAutoSensor(DeepBlueLabAccessControlDoorEntity doorEntity) {
         this.doorEntity = doorEntity;
@@ -44,19 +57,23 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
 
         // 客户端仅处理调试粒子渲染
         if (level.isClientSide()) {
+            particleTimer++;
             spawnDebugParticles();
+            spawnFrontAreaDebugParticles(); // 渲染门前方判断区域
             return;
         }
 
         // 服务端处理玩家检测和门状态切换
         if (level instanceof ServerLevel serverLevel) {
-            boolean hasPlayerNearby = detectNearbyPlayers(serverLevel);
-            updateDoorState(hasPlayerNearby);
+            // 获取距离门最近的玩家
+            Optional<Player> players = detectNearbyPlayers(serverLevel);
+
+            updateDoorState(players);
         }
     }
 
-    // 玩家检测
-    private boolean detectNearbyPlayers(ServerLevel serverLevel) {
+    // 玩家检测，获取最近的玩家
+    private Optional<Player> detectNearbyPlayers(ServerLevel serverLevel) {
         BlockPos pos = doorEntity.getBlockPos();
         // 以门中心为原点，构建检测范围 AABB
         double centerX = pos.getX() + 0.5D;
@@ -79,12 +96,112 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
                 player -> !player.isSpectator() && player.isAlive()
         );
 
-        return !nearbyPlayers.isEmpty();
+        if (nearbyPlayers.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // 找到距离门最近的玩家
+        Player closestPlayer = null;
+        double closestDistanceSq = Double.MAX_VALUE;
+        for (Player player : nearbyPlayers) {
+            double distanceSq = player.distanceToSqr(centerX, centerY, centerZ);
+            if (distanceSq < closestDistanceSq) {
+                closestDistanceSq = distanceSq;
+                closestPlayer = player;
+            }
+        }
+
+        return Optional.ofNullable(closestPlayer);
+    }
+
+    private boolean isPlayerInDoorFront(Player player) {
+        BlockPos doorPos = doorEntity.getBlockPos();
+        BlockState doorState = doorEntity.getBlockState();
+        Direction doorFacing = doorState.getValue(DeepBlueLabAccessControlDoor.FACING);
+
+        // 计算门前方区域的 AABB 边界
+        AABB frontAreaAABB = calculateFrontAreaAABB(doorPos, doorFacing);
+
+        // 判断玩家的碰撞箱是否与前方区域相交
+        return player.getBoundingBox().intersects(frontAreaAABB);
+    }
+
+
+    // 播放开门音效
+    private void playDoorOpenSound() {
+        Level level = doorEntity.getLevel();
+        BlockPos doorPos = doorEntity.getBlockPos();
+
+        // 仅在服务端播放（自动同步给周围玩家）
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.playSound(
+                    null, // 播放者（null表示全局播放，周围16格内玩家可听）
+                    doorPos, // 音效播放位置（门的位置）
+                    ModSoundRegister.DEEP_BLUE_LAB_ACCESS_CONTROL_DOOR_OPEN.get(), // 音效
+                    SoundSource.BLOCKS, // 声音类别（方块音效）
+                    1.0F, // 音量
+                    1.0F  // 音调
+            );
+        }
+    }
+    // 根据门的位置和朝向，计算前方判断区域的 AABB
+    private AABB calculateFrontAreaAABB(BlockPos doorPos, Direction facing) {
+        double doorCenterX = doorPos.getX() + 0.5D;
+        double doorCenterZ = doorPos.getZ() + 0.5D;
+
+        // 区域基础参数（可自由调整）
+        double halfWidth = DOOR_FRONT_AREA_WIDTH / 2.0D; // 半宽（左右对称）
+        double depth = DOOR_FRONT_AREA_DEPTH; // 深度（门前方的长度）
+        double minY = doorPos.getY(); // 区域底部（与门底部齐平）
+        double maxY = doorPos.getY() + DOOR_FRONT_AREA_HEIGHT; // 区域顶部
+
+        // 根据门朝向计算 X/Z 轴边界
+        return switch (facing) {
+            // 朝东：X轴从门右侧开始，向右延伸 depth 格；Z轴左右对称
+            case EAST -> new AABB(
+                    doorPos.getX() - depth, // 区域左边界（向左延伸 depth 格）
+                    minY,
+                    doorCenterZ - halfWidth,
+                    doorPos.getX(), // 区域右边界（门的左侧）
+                    maxY,
+                    doorCenterZ + halfWidth
+            );
+            // 朝西：X轴从门左侧向左延伸 depth 格；Z轴左右对称
+            case WEST -> new AABB(
+                    doorPos.getX() + 1.0D, // 区域左边界（门的右侧）
+                    minY,
+                    doorCenterZ - halfWidth, // 区域后边界
+                    doorPos.getX() + 1.0D + depth, // 区域右边界（延伸 depth 格）
+                    maxY,
+                    doorCenterZ + halfWidth  // 区域前边界
+            );
+            // 朝南：Z轴从门后侧开始，向后延伸 depth 格；X轴左右对称
+            case SOUTH -> new AABB(
+                    doorCenterX - halfWidth,
+                    minY,
+                    doorPos.getZ() - depth, // 区域前边界（向前延伸 depth 格）
+                    doorCenterX + halfWidth,
+                    maxY,
+                    doorPos.getZ() // 区域后边界（门的前侧）
+            );
+            // 朝北：Z轴从门前侧向前延伸 depth 格；X轴左右对称
+            case NORTH -> new AABB(
+                    doorCenterX - halfWidth, // 区域左边界
+                    minY,
+                    doorPos.getZ() + 1.0D, // 区域前边界（门的后侧）
+                    doorCenterX + halfWidth, // 区域右边界
+                    maxY,
+                    doorPos.getZ() + 1.0D + depth // 区域后边界（延伸 depth 格）
+            );
+            // 垂直朝向（理论上不会触发，留作兼容）
+            default -> new AABB(doorPos);
+        };
     }
 
     // 服务端：门状态更新逻辑
-    private void updateDoorState(boolean hasPlayerNearby) {
+    private void updateDoorState(Optional<Player> closestPlayerOpt) {
         DeepBlueLabAccessControlDoorEntity.DoorState currentState = doorEntity.getDoorState();
+        boolean hasPlayerNearby = closestPlayerOpt.isPresent();
         if (hasPlayerNearby) {
             // 玩家在范围内：准备开门
 
@@ -103,6 +220,11 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
             if (openDelayTimer >= OPEN_DELAY+SYNC_DELAY) {
                 // 开门
                 doorEntity.openDoor();
+
+                // 播放正面开门音效
+                if(isPlayerInDoorFront(closestPlayerOpt.get())){
+                    playDoorOpenSound();
+                }
             }
         } else {
             // 玩家不在范围内：准备关门
@@ -124,18 +246,15 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
         }
     }
 
-    // ==================== 客户端：调试粒子渲染（仅调试模式）====================
+    // ==================== 客户端：调试粒子（原检测范围，红色）====================
     @OnlyIn(Dist.CLIENT)
     private void spawnDebugParticles() {
         Minecraft mc = Minecraft.getInstance();
         boolean isDebugMode = mc.options.renderDebug;
-        // 粒子显示条件：强制显示 或 打开F3调试模式
         if (!FORCE_SHOW_PARTICLE && !isDebugMode) {
             return;
         }
 
-        // 控制粒子生成间隔（避免每tick生成过多）
-        particleTimer++;
         if (particleTimer % PARTICLE_INTERVAL != 0) {
             return;
         }
@@ -145,7 +264,7 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
         double centerY = pos.getY() + 3D;
         double centerZ = pos.getZ() + 0.5D;
 
-        // 构建立方体8个顶点（检测范围边界）
+        // 构建立方体8个顶点
         Vec3[] vertices = new Vec3[8];
         vertices[0] = new Vec3(centerX - DETECT_RADIUS, centerY - DETECT_RADIUS, centerZ - DETECT_RADIUS);
         vertices[1] = new Vec3(centerX + DETECT_RADIUS, centerY - DETECT_RADIUS, centerZ - DETECT_RADIUS);
@@ -156,46 +275,84 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
         vertices[6] = new Vec3(centerX + DETECT_RADIUS, centerY + DETECT_RADIUS, centerZ + DETECT_RADIUS);
         vertices[7] = new Vec3(centerX - DETECT_RADIUS, centerY + DETECT_RADIUS, centerZ + DETECT_RADIUS);
 
-        // 立方体12条边（连接顶点）
+        // 立方体12条边
+        int[][] edges = {
+                {0, 1}, {1, 2}, {2, 3}, {3, 0},
+                {4, 5}, {5, 6}, {6, 7}, {7, 4},
+                {0, 4}, {1, 5}, {2, 6}, {3, 7}
+        };
+
+        // 红色粒子渲染检测范围
+        DustParticleOptions redParticle = DustParticleOptions.REDSTONE;
+        for (int[] edge : edges) {
+            spawnParticlesAlongLine(vertices[edge[0]], vertices[edge[1]], redParticle);
+        }
+    }
+
+    // ==================== 客户端：新增前方区域调试粒子（绿色）====================
+    @OnlyIn(Dist.CLIENT)
+    private void spawnFrontAreaDebugParticles() {
+        Minecraft mc = Minecraft.getInstance();
+        boolean isDebugMode = mc.options.renderDebug;
+        if (!FORCE_SHOW_PARTICLE && !isDebugMode) {
+            return;
+        }
+
+        if (particleTimer % PARTICLE_INTERVAL != 0) {
+            return;
+        }
+
+        BlockPos doorPos = doorEntity.getBlockPos();
+        BlockState doorState = doorEntity.getBlockState();
+        Direction doorFacing = doorState.getValue(DeepBlueLabAccessControlDoor.FACING);
+
+        // 获取前方区域的 AABB
+        AABB frontAreaAABB = calculateFrontAreaAABB(doorPos, doorFacing);
+
+        // 提取 AABB 的8个顶点
+        Vec3[] vertices = new Vec3[8];
+        vertices[0] = new Vec3(frontAreaAABB.minX, frontAreaAABB.minY, frontAreaAABB.minZ);
+        vertices[1] = new Vec3(frontAreaAABB.maxX, frontAreaAABB.minY, frontAreaAABB.minZ);
+        vertices[2] = new Vec3(frontAreaAABB.maxX, frontAreaAABB.maxY, frontAreaAABB.minZ);
+        vertices[3] = new Vec3(frontAreaAABB.minX, frontAreaAABB.maxY, frontAreaAABB.minZ);
+        vertices[4] = new Vec3(frontAreaAABB.minX, frontAreaAABB.minY, frontAreaAABB.maxZ);
+        vertices[5] = new Vec3(frontAreaAABB.maxX, frontAreaAABB.minY, frontAreaAABB.maxZ);
+        vertices[6] = new Vec3(frontAreaAABB.maxX, frontAreaAABB.maxY, frontAreaAABB.maxZ);
+        vertices[7] = new Vec3(frontAreaAABB.minX, frontAreaAABB.maxY, frontAreaAABB.maxZ);
+
+        // 立方体12条边
         int[][] edges = {
                 {0, 1}, {1, 2}, {2, 3}, {3, 0}, // 前面
                 {4, 5}, {5, 6}, {6, 7}, {7, 4}, // 后面
                 {0, 4}, {1, 5}, {2, 6}, {3, 7}  // 侧面
         };
 
-        // 沿每条边生成粒子
+        // 绿色粒子渲染前方判断区域
         for (int[] edge : edges) {
-            spawnParticlesAlongLine(vertices[edge[0]], vertices[edge[1]]);
+            spawnParticlesAlongLine(vertices[edge[0]], vertices[edge[1]], FRONT_AREA_PARTICLE);
         }
     }
 
-    // ==================== 客户端：沿线段均匀生成粒子 ====================
+    // 通用粒子生成方法（支持自定义粒子颜色）
     @OnlyIn(Dist.CLIENT)
-    private void spawnParticlesAlongLine(Vec3 start, Vec3 end) {
+    private void spawnParticlesAlongLine(Vec3 start, Vec3 end, DustParticleOptions particle) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
 
-        // 计算线段步长（均匀分布粒子）
+        // 均匀分布粒子
         double dx = (end.x - start.x) / EDGE_POINT_COUNT;
         double dy = (end.y - start.y) / EDGE_POINT_COUNT;
         double dz = (end.z - start.z) / EDGE_POINT_COUNT;
-
-        // 生成红色调试粒子（关键修复：使用 DustParticleOptions 替代强制转换）
-        // 方案1：使用默认红色粒子（推荐，简洁）
-        DustParticleOptions redParticle = DustParticleOptions.REDSTONE;
-        // 方案2：自定义颜色和大小（例如：深红色，大小1.0F）
-        // DustParticleOptions redParticle = new DustParticleOptions(new Vec3(0.8D, 0.0D, 0.0D), 1.0F);
 
         for (int i = 0; i <= EDGE_POINT_COUNT; i++) {
             double x = start.x + dx * i;
             double y = start.y + dy * i;
             double z = start.z + dz * i;
 
-            // 修复：传入正确的 ParticleOptions 实例，运动方向设为 0（静止粒子）
             mc.level.addParticle(
-                    redParticle, // 正确的粒子选项（包含颜色和大小）
+                    particle,
                     x, y, z,
-                    0.0D, 0.0D, 0.0D // 粒子运动方向（0=静止，避免飘走）
+                    0.0D, 0.0D, 0.0D // 静止粒子
             );
         }
     }
