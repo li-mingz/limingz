@@ -1,7 +1,10 @@
 package com.limingz.mymod.register;
 
 import com.limingz.mymod.Main;
-import com.limingz.mymod.block.*;
+import com.limingz.mymod.block.DeepBlueLabAccessControlDoor;
+import com.limingz.mymod.block.DemoBlock;
+import com.limingz.mymod.block.DeskBlock;
+import com.limingz.mymod.block.SmallDoorBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;

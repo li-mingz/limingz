@@ -1,0 +1,8 @@
+{
+  "block.deep_blue_lab_access_control_door.open": {
+    "category": "block",
+    "sounds": [
+      "mymod:deep_blue_lab_access_control_door/deep_blue_lab_access_control_door_open"
+    ]
+  }
+}

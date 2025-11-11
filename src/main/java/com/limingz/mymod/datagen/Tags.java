@@ -8,6 +8,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+
 import static net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL;
 
 public class Tags extends BlockTagsProvider {

@@ -2,7 +2,6 @@ package com.limingz.mymod.gui.holographic_ui.renderer.ui.system;
 
 import com.limingz.mymod.Main;
 import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
-import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
 import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.util.pacture.PNGTextureManager;
 import com.mojang.blaze3d.vertex.PoseStack;
