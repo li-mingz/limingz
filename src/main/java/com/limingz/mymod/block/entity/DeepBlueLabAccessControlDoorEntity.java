@@ -243,10 +243,10 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         AnimationController<DeepBlueLabAccessControlDoorEntity> animationController = new AnimationController<>(this, "door_controller", 0, this::doorAnimController);
         controllers.add(animationController);
     }
+    // 客户端动画
     protected PlayState doorAnimController(final AnimationState<DeepBlueLabAccessControlDoorEntity> state) {
         AnimationController<DeepBlueLabAccessControlDoorEntity> controller = state.getController();
         AnimationControllerAccess animationControllerAccess = (AnimationControllerAccess) controller;
-        Minecraft mc = Minecraft.getInstance();
         controller.setAnimation(OPEN_AND_CLOSE_ANIM);
         // 动画加载完后再获取
         if (controller.getCurrentAnimation() != null) {
@@ -257,18 +257,21 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
                 // 加载动画帧
                 animationControllerAccess.setAnimationTick(animationTick);
                 needLoadTick = false;
-            } else if(!mc.isPaused()) {
+//            } else if(!mc.isPaused()) {
+            } else {
                 // 加载时不需要计算动画帧
                 // 暂停时不更新动画帧
                 // 计算当前动画帧
                 animationTick = Math.min(state.getAnimationTick()-offsetTick, animationLength) ;
-            } else {
-                // 暂停时强制设置动画帧,防止串动画
-                animationControllerAccess.setAnimationTick(animationTick);
             }
+//            else {
+//                // 暂停时强制设置动画帧,防止串动画
+//                animationControllerAccess.setAnimationTick(animationTick);
+//            }
             // 更新动画状态,仅非状态状态更新
             // 暂停时会串动画，也不知道为什么
-            if ((doorState == DoorState.OPENING || doorState == DoorState.CLOSING)&&!mc.isPaused()) {
+//            if ((doorState == DoorState.OPENING || doorState == DoorState.CLOSING)&&!mc.isPaused()) {
+                if (doorState == DoorState.OPENING || doorState == DoorState.CLOSING) {
                 // 检查动画是否完成
                 if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
                     doorState = DoorState.OPENED;
@@ -359,6 +362,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         super.handleUpdateTag(tag);
         load(tag); // 客户端加载同步的数据
     }
+
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.cache;
@@ -382,6 +386,26 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     }
     public void serverTick() {
         autoSensor.handleTick();
+        // 服务端动画帧自增
+//        if (doorState == DoorState.OPENING || doorState == DoorState.CLOSING) {
+//            // 检查动画是否完成
+//            if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
+//                doorState = DoorState.OPENED;
+//                // 同步开门状态
+//                Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength/2, doorState));
+//                switchDoorState();
+//            } else if(doorState == DoorState.CLOSING && animationTick >= animationLength) {
+//                doorState = DoorState.CLOSED;
+//                // 同步关门状态
+//                Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength, doorState));
+//                switchDoorState();
+//            }
+//        }
+//        if(doorState == DoorState.CLOSED){
+//            animationTick = animationLength;
+//        } else if(doorState == DoorState.OPENED){
+//            animationTick = animationLength/2;
+//        }
     }
 
 }
