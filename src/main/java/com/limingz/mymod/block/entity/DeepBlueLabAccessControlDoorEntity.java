@@ -1,6 +1,7 @@
 package com.limingz.mymod.block.entity;
 
 import com.limingz.mymod.Main;
+import com.limingz.mymod.block.DeepBlueLabAccessControlDoor;
 import com.limingz.mymod.block.util.DeepBlueLabAccessControlDoorAutoSensor;
 import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
@@ -12,12 +13,14 @@ import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPac
 import com.limingz.mymod.register.BlockEntityRegister;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -31,6 +34,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity, AnimatedPngHolder {
+
+
+    public static AABB SOUTH_AND_NORTH_MAX_BOUNDING_BOX;
+    public static AABB EAST_AND_WEST_MAX_BOUNDING_BOX;
+
     // 存储每个组件的独立状态（key：组件id，value：状态）
     private final Map<String, AnimatedPngState> componentStates = new HashMap<>();
     private final Map<String, PngState> pngStates = new HashMap<>();
@@ -74,6 +82,17 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
 
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
+
+        SOUTH_AND_NORTH_MAX_BOUNDING_BOX = new AABB(
+                pPos.getX()-4.5D, pPos.getY(), pPos.getZ(),
+                pPos.getX()+5.5D, pPos.getY()+6.0D, pPos.getZ()+1.0D
+        );
+        EAST_AND_WEST_MAX_BOUNDING_BOX = new AABB(
+                pPos.getX()+0.0D, pPos.getY(), pPos.getZ()-4.5D,
+                pPos.getX()+1.0D, pPos.getY()+6.0D, pPos.getZ()+5.5D
+        );
+
+
         onPlayOnceFinishedMap =  new HashMap<>();
 
         this.autoSensor = new DeepBlueLabAccessControlDoorAutoSensor(this);
@@ -359,6 +378,17 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         } else if(doorState == DoorState.OPENED){
             animationTick = animationLength/2;
         }
+    }
+
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        Direction doorFacing = this.getBlockState().getValue(DeepBlueLabAccessControlDoor.FACING);
+        return switch (doorFacing) {
+            case EAST, WEST -> EAST_AND_WEST_MAX_BOUNDING_BOX;
+            case SOUTH, NORTH -> SOUTH_AND_NORTH_MAX_BOUNDING_BOX;
+            default -> new AABB(0, 0, 0, 1, 1, 1);
+        };
     }
 
 }
