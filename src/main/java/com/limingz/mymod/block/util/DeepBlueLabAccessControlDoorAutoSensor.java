@@ -26,7 +26,6 @@ import java.util.Optional;
 public class DeepBlueLabAccessControlDoorAutoSensor {
     public static final int OPEN_DELAY = 20; // 开门延迟（20 tick = 1 秒）
     public static final int CLOSE_DELAY = 20; // 关门延迟（20 tick = 1 秒）
-    public static final int SYNC_DELAY = 2; // 同步延迟
 
 
     public static final boolean FORCE_SHOW_PARTICLE = true; // 强制显示调试粒子
@@ -260,18 +259,12 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
 
             openDelayTimer++;
             if (openDelayTimer == OPEN_DELAY) {
-                // 同步客户端动画帧
-//                doorEntity.sendNearbyPacketGetClientPacket();
-            }
-            if (openDelayTimer >= OPEN_DELAY+SYNC_DELAY) {
                 // 播放正面开门音效, 需要完全关闭后打开才触发
                 if(isPlayerInDoorFront(closestPlayerOpt.get()) && currentState == DeepBlueLabAccessControlDoorEntity.DoorState.CLOSED){
                     playDoorOpenSound();
                 }
-                doorEntity.setAnimationTick(doorEntity.getAnimationLength()-doorEntity.getAnimationTick());
                 // 开门
                 doorEntity.openDoor();
-
             }
         } else {
             // 玩家不在范围内：准备关门
@@ -283,12 +276,6 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
             }
             closeDelayTimer++;
             if (closeDelayTimer == CLOSE_DELAY) {
-                // 同步客户端动画帧
-//                doorEntity.sendNearbyPacketGetClientPacket();
-            }
-            if (closeDelayTimer >= CLOSE_DELAY+SYNC_DELAY) {
-
-                doorEntity.setAnimationTick(doorEntity.getAnimationLength()-doorEntity.getAnimationTick());
                 // 关门
                 doorEntity.closeDoor();
             }

@@ -8,7 +8,6 @@ import com.limingz.mymod.gui.holographic_ui.util.AnimatedPngState;
 import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.mixins_access.AnimationControllerAccess;
 import com.limingz.mymod.network.Channel;
-import com.limingz.mymod.network.packet.servertoplayer.GetClientTickPacket;
 import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import com.limingz.mymod.util.PauseTick;
@@ -17,8 +16,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
@@ -71,6 +68,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     private double animationTick = 0;
     // 当前动画的长度
     private double animationLength = 600;  // 30 * 20
+
     // 是否需要加载动画的帧数
     private Boolean needLoadTick = false;
 
@@ -176,7 +174,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         aside_ro_openAnimatedPng.setShowState(false);
         aside_ro_openAnimatedPng.clearOnPlayOnceFinishedExecuteList();
     }
-    private void switchDoorState(){
+    public void switchDoorState(){
         if (doorState == DoorState.CLOSING) {
             doorClosingAnimate();
         } else if (doorState == DoorState.OPENING) {
@@ -190,22 +188,18 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     public void openDoor(){
         doorState = DoorState.OPENING;
         doorOpeningAnimate();
+        // 反转动画进度实现平滑过渡
+        animationTick = animationLength - animationTick;
         // 同步数据到客户端
-        setChanged();
-        if (level != null) {
-            // 立即同步状态
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
-        }
+        Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationTick, doorState), this.worldPosition, (ServerLevel) this.level);
     }
     public void closeDoor(){
         doorState = DoorState.CLOSING;
         doorClosingAnimate();
+        // 反转动画进度实现平滑过渡
+        animationTick = animationLength - animationTick;
         // 同步数据到客户端
-        setChanged();
-        if (level != null) {
-            // 立即同步状态
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
-        }
+        Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationTick, doorState), this.worldPosition, (ServerLevel) this.level);
     }
     @Override
     public Map<String, AnimatedPngState> getAnimatedState() {
@@ -217,26 +211,6 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         return pngStates;
     }
 
-
-    // 切换门的状态
-    public void toggleDoor() {
-        if (doorState == DoorState.CLOSED || doorState == DoorState.CLOSING) {
-            // 如果是关门状态或正在关门，改为开门
-            doorState = DoorState.OPENING;
-            doorOpeningAnimate();
-        } else if (doorState == DoorState.OPENED || doorState == DoorState.OPENING) {
-            // 如果是开门状态或正在开门，改为关门
-            doorState = DoorState.CLOSING;
-            doorClosingAnimate();
-        }
-        // 同步数据到客户端
-        setChanged();
-        if (level != null) {
-            // 立即同步状态
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
-        }
-
-    }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
@@ -257,31 +231,17 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
                 // 加载动画帧
                 animationControllerAccess.setAnimationTick(animationTick);
                 needLoadTick = false;
-//            } else if(!mc.isPaused()) {
             } else {
-                // 加载时不需要计算动画帧
-                // 暂停时不更新动画帧
                 // 计算当前动画帧
                 animationTick = Math.min(state.getAnimationTick()-offsetTick, animationLength) ;
             }
-//            else {
-//                // 暂停时强制设置动画帧,防止串动画
-//                animationControllerAccess.setAnimationTick(animationTick);
-//            }
-            // 更新动画状态,仅非状态状态更新
-            // 暂停时会串动画，也不知道为什么
-//            if ((doorState == DoorState.OPENING || doorState == DoorState.CLOSING)&&!mc.isPaused()) {
                 if (doorState == DoorState.OPENING || doorState == DoorState.CLOSING) {
                 // 检查动画是否完成
                 if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
                     doorState = DoorState.OPENED;
-                    // 同步开门状态
-//                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength/2, doorState));
                     switchDoorState();
                 } else if(doorState == DoorState.CLOSING && animationTick >= animationLength) {
                     doorState = DoorState.CLOSED;
-                    // 同步关门状态
-//                    Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength, doorState));
                     switchDoorState();
                 }
             }
@@ -295,19 +255,6 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         }
         return PlayState.CONTINUE;
     }
-    public void sendNearbyPacketGetClientPacket() {
-        Level level = this.level;
-        if (level == null || level.isClientSide) return; // 仅服务端执行
-
-        ServerLevel serverLevel = (ServerLevel) level;
-        BlockPos blockPos = this.worldPosition;
-        // 创建自定义数据包
-        GetClientTickPacket packet = new GetClientTickPacket(blockPos);
-
-        // 向附近 64 格玩家发送
-        Channel.sendToNearby(packet, blockPos, serverLevel);
-    }
-
 
     public Double getAnimationTick() {
         return animationTick;
@@ -380,6 +327,9 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         this.doorState = doorState;
     }
 
+    public void setNeedLoadTick(Boolean needLoadTick) {
+        this.needLoadTick = needLoadTick;
+    }
 
     public void clientTick() {
         autoSensor.handleTick();
@@ -392,12 +342,12 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
                 doorState = DoorState.OPENED;
                 // 同步开门状态
-                Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationLength, doorState), this.worldPosition, (ServerLevel) this.level);
+                Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationTick, doorState), this.worldPosition, (ServerLevel) this.level);
                 switchDoorState();
             } else if(doorState == DoorState.CLOSING && animationTick >= animationLength) {
                 doorState = DoorState.CLOSED;
                 // 同步关门状态
-                Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationLength, doorState), this.worldPosition, (ServerLevel) this.level);
+                Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationTick, doorState), this.worldPosition, (ServerLevel) this.level);
                 switchDoorState();
             } else {
                 animationTick += 1D;

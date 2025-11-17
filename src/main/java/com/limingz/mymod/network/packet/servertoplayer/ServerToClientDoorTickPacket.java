@@ -4,7 +4,6 @@ import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -41,6 +40,8 @@ public class ServerToClientDoorTickPacket {
                 doorEntity.setAnimationTick(animationTick);
                 doorEntity.setDoorState(doorState);
                 doorEntity.setChanged();
+                doorEntity.setNeedLoadTick(true);
+                doorEntity.switchDoorState();
             }
         });
         ctx.get().setPacketHandled(true);
