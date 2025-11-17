@@ -1,5 +1,6 @@
 package com.limingz.mymod.block.entity;
 
+import com.limingz.mymod.Main;
 import com.limingz.mymod.block.util.DeepBlueLabAccessControlDoorAutoSensor;
 import com.limingz.mymod.gui.holographic_ui.interfaces.AnimatedPngHolder;
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
@@ -8,6 +9,7 @@ import com.limingz.mymod.gui.holographic_ui.util.PngState;
 import com.limingz.mymod.mixins_access.AnimationControllerAccess;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.servertoplayer.GetClientTickPacket;
+import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.core.BlockPos;
@@ -390,16 +392,22 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             if (doorState == DoorState.OPENING && animationTick >= animationLength/2) {
                 doorState = DoorState.OPENED;
                 // 同步开门状态
-//                Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength/2, doorState));
+                Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationLength, doorState), this.worldPosition, (ServerLevel) this.level);
                 switchDoorState();
             } else if(doorState == DoorState.CLOSING && animationTick >= animationLength) {
                 doorState = DoorState.CLOSED;
                 // 同步关门状态
-//                Channel.INSTANCE.sendToServer(new DoorTickPacket(worldPosition, animationLength, doorState));
+                Channel.sendToNearby(new ServerToClientDoorTickPacket(worldPosition, animationLength, doorState), this.worldPosition, (ServerLevel) this.level);
                 switchDoorState();
             } else {
                 animationTick += 1D;
+                Main.LOGGER.info(String.valueOf(animationTick));
             }
+        }
+        if(doorState == DoorState.CLOSED){
+            animationTick = animationLength;
+        } else if(doorState == DoorState.OPENED){
+            animationTick = animationLength/2;
         }
     }
 
