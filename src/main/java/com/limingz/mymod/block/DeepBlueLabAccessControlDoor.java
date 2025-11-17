@@ -2,7 +2,7 @@ package com.limingz.mymod.block;
 
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
 import com.limingz.mymod.network.Channel;
-import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
+import com.limingz.mymod.network.packet.playertoserver.ClientToServerDoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,7 +67,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
                 // 切换门的状态
                 doorEntity.toggleDoor();
             } else {
-                Channel.INSTANCE.sendToServer(new DoorTickPacket(pos, doorEntity.getAnimationLength()-doorEntity.getAnimationTick(), doorEntity.getDoorState()));
+                Channel.INSTANCE.sendToServer(new ClientToServerDoorTickPacket(pos, doorEntity.getAnimationLength()-doorEntity.getAnimationTick(), doorEntity.getDoorState()));
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

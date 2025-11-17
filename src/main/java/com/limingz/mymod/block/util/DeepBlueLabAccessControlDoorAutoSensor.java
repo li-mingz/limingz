@@ -261,13 +261,14 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
             openDelayTimer++;
             if (openDelayTimer == OPEN_DELAY) {
                 // 同步客户端动画帧
-                doorEntity.sendNearbyPacketGetClientPacket();
+//                doorEntity.sendNearbyPacketGetClientPacket();
             }
             if (openDelayTimer >= OPEN_DELAY+SYNC_DELAY) {
                 // 播放正面开门音效, 需要完全关闭后打开才触发
                 if(isPlayerInDoorFront(closestPlayerOpt.get()) && currentState == DeepBlueLabAccessControlDoorEntity.DoorState.CLOSED){
                     playDoorOpenSound();
                 }
+                doorEntity.setAnimationTick(doorEntity.getAnimationLength()-doorEntity.getAnimationTick());
                 // 开门
                 doorEntity.openDoor();
 
@@ -283,9 +284,11 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
             closeDelayTimer++;
             if (closeDelayTimer == CLOSE_DELAY) {
                 // 同步客户端动画帧
-                doorEntity.sendNearbyPacketGetClientPacket();
+//                doorEntity.sendNearbyPacketGetClientPacket();
             }
             if (closeDelayTimer >= CLOSE_DELAY+SYNC_DELAY) {
+
+                doorEntity.setAnimationTick(doorEntity.getAnimationLength()-doorEntity.getAnimationTick());
                 // 关门
                 doorEntity.closeDoor();
             }

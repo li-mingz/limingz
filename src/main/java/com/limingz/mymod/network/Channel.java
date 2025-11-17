@@ -1,8 +1,9 @@
 package com.limingz.mymod.network;
 
-import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
+import com.limingz.mymod.network.packet.playertoserver.ClientToServerDoorTickPacket;
 import com.limingz.mymod.network.packet.servertoplayer.FarmXpPacket;
 import com.limingz.mymod.network.packet.servertoplayer.GetClientTickPacket;
+import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -30,10 +31,15 @@ public class Channel {
                 .encoder(FarmXpPacket::encode)
                 .consumerMainThread(FarmXpPacket::handle)
                 .add();
-        INSTANCE.messageBuilder(DoorTickPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .decoder(DoorTickPacket::decode)
-                .encoder(DoorTickPacket::encode)
-                .consumerMainThread(DoorTickPacket::handle)
+        INSTANCE.messageBuilder(ClientToServerDoorTickPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .decoder(ClientToServerDoorTickPacket::decode)
+                .encoder(ClientToServerDoorTickPacket::encode)
+                .consumerMainThread(ClientToServerDoorTickPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(ServerToClientDoorTickPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ServerToClientDoorTickPacket::decode)
+                .encoder(ServerToClientDoorTickPacket::encode)
+                .consumerMainThread(ServerToClientDoorTickPacket::handle)
                 .add();
         INSTANCE.messageBuilder(GetClientTickPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(GetClientTickPacket::decode)

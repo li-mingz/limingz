@@ -1,6 +1,7 @@
-package com.limingz.mymod.network.packet.playertoserver;
+package com.limingz.mymod.network.packet.servertoplayer;
 
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -9,12 +10,12 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class DoorTickPacket {
+public class ServerToClientDoorTickPacket {
     private final BlockPos blockPos;
     private final Double animationTick;
     private final DeepBlueLabAccessControlDoorEntity.DoorState doorState;
 
-    public DoorTickPacket(BlockPos blockPos, Double animationTick, DeepBlueLabAccessControlDoorEntity.DoorState doorState) {
+    public ServerToClientDoorTickPacket(BlockPos blockPos, Double animationTick, DeepBlueLabAccessControlDoorEntity.DoorState doorState) {
         this.blockPos = blockPos;
         this.animationTick = animationTick;
         this.doorState = doorState;
@@ -26,15 +27,17 @@ public class DoorTickPacket {
         buf.writeEnum(doorState);
     }
 
-    public static DoorTickPacket decode(FriendlyByteBuf buf) {
-        return new DoorTickPacket(buf.readBlockPos(), buf.readDouble(), buf.readEnum(DeepBlueLabAccessControlDoorEntity.DoorState.class));
+    public static ServerToClientDoorTickPacket decode(FriendlyByteBuf buf) {
+        return new ServerToClientDoorTickPacket(buf.readBlockPos(), buf.readDouble(), buf.readEnum(DeepBlueLabAccessControlDoorEntity.DoorState.class));
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerLevel level = (ServerLevel) ctx.get().getSender().level();
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if(blockEntity instanceof DeepBlueLabAccessControlDoorEntity doorEntity){
+            var clientLevel = Minecraft.getInstance().level;
+            if (clientLevel == null) return;
+
+            BlockEntity blockEntity = clientLevel.getBlockEntity(blockPos);
+            if (blockEntity instanceof DeepBlueLabAccessControlDoorEntity doorEntity) {
                 doorEntity.setAnimationTick(animationTick);
                 doorEntity.setDoorState(doorState);
                 doorEntity.setChanged();

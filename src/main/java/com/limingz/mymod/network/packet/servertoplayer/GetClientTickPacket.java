@@ -2,7 +2,7 @@ package com.limingz.mymod.network.packet.servertoplayer;
 
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
 import com.limingz.mymod.network.Channel;
-import com.limingz.mymod.network.packet.playertoserver.DoorTickPacket;
+import com.limingz.mymod.network.packet.playertoserver.ClientToServerDoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -49,7 +49,7 @@ public class GetClientTickPacket {
             ).orElse(null);
             if (deepBlueLabAccessControlDoorEntity != null) {
                 // 同步客户端的动画帧
-                Channel.INSTANCE.sendToServer(new DoorTickPacket(blockPos, deepBlueLabAccessControlDoorEntity.getAnimationLength()-deepBlueLabAccessControlDoorEntity.getAnimationTick(), deepBlueLabAccessControlDoorEntity.getDoorState()));
+                Channel.INSTANCE.sendToServer(new ClientToServerDoorTickPacket(blockPos, deepBlueLabAccessControlDoorEntity.getAnimationLength()-deepBlueLabAccessControlDoorEntity.getAnimationTick(), deepBlueLabAccessControlDoorEntity.getDoorState()));
             }
         });
 
