@@ -36,8 +36,8 @@ import java.util.Map;
 public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements GeoBlockEntity, AnimatedPngHolder {
 
 
-    public static AABB SOUTH_AND_NORTH_MAX_BOUNDING_BOX;
-    public static AABB EAST_AND_WEST_MAX_BOUNDING_BOX;
+    public AABB SOUTH_AND_NORTH_MAX_BOUNDING_BOX;
+    public AABB EAST_AND_WEST_MAX_BOUNDING_BOX;
 
     // 存储每个组件的独立状态（key：组件id，value：状态）
     private final Map<String, AnimatedPngState> componentStates = new HashMap<>();
@@ -84,12 +84,12 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
 
         SOUTH_AND_NORTH_MAX_BOUNDING_BOX = new AABB(
-                pPos.getX()-4.5D, pPos.getY(), pPos.getZ(),
-                pPos.getX()+5.5D, pPos.getY()+6.0D, pPos.getZ()+1.0D
+                pPos.getX()-4.0D, pPos.getY(), pPos.getZ(),
+                pPos.getX()+5.0D, pPos.getY()+6.0D, pPos.getZ()+1.0D
         );
         EAST_AND_WEST_MAX_BOUNDING_BOX = new AABB(
-                pPos.getX()+0.0D, pPos.getY(), pPos.getZ()-4.5D,
-                pPos.getX()+1.0D, pPos.getY()+6.0D, pPos.getZ()+5.5D
+                pPos.getX()+0.0D, pPos.getY(), pPos.getZ()-4.0D,
+                pPos.getX()+1.0D, pPos.getY()+6.0D, pPos.getZ()+5.0D
         );
 
 

@@ -66,8 +66,8 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
             particleTimer++;
 //            spawnDetectionAreaDebugParticles(doorOpenDetectionArea, DETECTION_AREA_PARTICLE);
 //            spawnDetectionAreaDebugParticles(doorOpenSoundDetectionArea, FRONT_AREA_PARTICLE); // 渲染门前方判断区域
-            spawnDetectionAreaDebugParticles(DeepBlueLabAccessControlDoorEntity.EAST_AND_WEST_MAX_BOUNDING_BOX, DETECTION_AREA_PARTICLE);
-            spawnDetectionAreaDebugParticles(DeepBlueLabAccessControlDoorEntity.SOUTH_AND_NORTH_MAX_BOUNDING_BOX, FRONT_AREA_PARTICLE); // 渲染门前方判断区域
+            spawnDetectionAreaDebugParticles(doorEntity.EAST_AND_WEST_MAX_BOUNDING_BOX, DETECTION_AREA_PARTICLE);
+            spawnDetectionAreaDebugParticles(doorEntity.SOUTH_AND_NORTH_MAX_BOUNDING_BOX, FRONT_AREA_PARTICLE); // 渲染门前方判断区域
             return;
         }
 
