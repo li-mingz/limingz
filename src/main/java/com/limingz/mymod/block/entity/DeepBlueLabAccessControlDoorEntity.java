@@ -63,6 +63,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
+
     // 门的状态
     public enum DoorState {
         OPENED,
@@ -236,6 +237,8 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
         AnimationController<DeepBlueLabAccessControlDoorEntity> animationController = new AnimationController<>(this, "door_controller", 0, this::doorAnimController);
         controllers.add(animationController);
     }
+
+
     // 客户端动画
     protected PlayState doorAnimController(final AnimationState<DeepBlueLabAccessControlDoorEntity> state) {
         AnimationController<DeepBlueLabAccessControlDoorEntity> controller = state.getController();
@@ -379,6 +382,7 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             animationTick = animationLength/2;
         }
     }
+
 
 
     @Override

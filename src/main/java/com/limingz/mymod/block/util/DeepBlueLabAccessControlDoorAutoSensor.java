@@ -40,7 +40,6 @@ public class DeepBlueLabAccessControlDoorAutoSensor {
     private int closeDelayTimer = 0; // 关门延迟计时器
     private int particleTimer = 0; // 粒子生成计时器（控制间隔）
 
-    // ==================== 门前方判断区域配置（核心修改）====================
     public static final double DOOR_FRONT_AREA_WIDTH = 5.0D; // 区域宽度（格）- 覆盖门左右各0.5格
     public static final double DOOR_FRONT_AREA_DEPTH = 3.0D; // 区域深度（格）- 门前方2格内
     public static final double DOOR_FRONT_AREA_HEIGHT = 6.0D; // 区域高度（格）- 从门底部向上3格（覆盖玩家身高）

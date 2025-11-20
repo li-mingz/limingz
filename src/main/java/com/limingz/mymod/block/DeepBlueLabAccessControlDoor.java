@@ -27,30 +27,28 @@ import org.jetbrains.annotations.Nullable;
 
 public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final int MAX_XZ_INDEX = 8;
+    public static final int MIDDLE_XZ_INDEX = 4;
+    public static final int MAX_Y_OFFSET = 5;
+    // XZ偏移的映射表(IntegerProperty不允许负值)
+    private static final int[] XZ_OFFSET_MAP = new int[]{-4, -3, -2, -1, 0, 1, 2, 3, 4};
     // 占位方块在X/Z方向的相对位置
-    public static final IntegerProperty XZ_INDEX = IntegerProperty.create("xz_index", 0, 8);
+    public static final IntegerProperty XZ_INDEX = IntegerProperty.create("xz_index", 0, MAX_XZ_INDEX);
     // 占位方块在Y方向的相对位置
-    public static final IntegerProperty Y_OFFSET = IntegerProperty.create("y_offset", 0, 5);
+    public static final IntegerProperty Y_OFFSET = IntegerProperty.create("y_offset", 0, MAX_Y_OFFSET);
     // 是否是中心方块（负责渲染和逻辑）
     public static final BooleanProperty IS_MAIN = BooleanProperty.create("is_main");
-    // XZ偏移的映射表
-    private static final int[] XZ_OFFSET_MAP = new int[]{-4, -3, -2, -1, 0, 1, 2, 3, 4};
-//    protected static final VoxelShape SOUTH_AND_NORTH_SHAPE_CLOSE = Shapes.or(
-//            Block.box(0.0D, 0.0D, 5.0D, 48.0D, 96.0D, 11.0D),
-//            Block.box(-32.0D, 0.0D, 5.0D, 0.0D, 96.0D, 11.0D)
-//    );
     // 闭合状态：每个占位方块的碰撞体积（1×1×1基础框，拼接成完整门碰撞）
     private static final VoxelShape BASE_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
     // 打开状态：每个占位方块的碰撞体积（薄框，不阻挡）
-    private static final VoxelShape OPEN_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 2.0D);
-
+    private static final VoxelShape OPEN_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
 
 
     public DeepBlueLabAccessControlDoor(Properties pProperties) {
         super(pProperties);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(XZ_INDEX, 4)
+                .setValue(XZ_INDEX, MIDDLE_XZ_INDEX)
                 .setValue(Y_OFFSET, 0)
                 .setValue(IS_MAIN, true));
     }
@@ -58,26 +56,12 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(FACING, XZ_INDEX, Y_OFFSET, IS_MAIN);
     }
-    // 通过索引获取实际XZ偏移（核心映射方法）
+    // 通过索引获取实际XZ偏移
     private int getXzOffsetByIndex(int xzIndex) {
-        if (xzIndex < 0 || xzIndex >= XZ_OFFSET_MAP.length) {
-            return 0; // 异常索引默认返回0偏移
-        }
         return XZ_OFFSET_MAP[xzIndex];
     }
 
-//    @Override
-//    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-//        BlockPos blockpos = pContext.getClickedPos();
-//        Level level = pContext.getLevel();
-//        if (blockpos.getY() < level.getMaxBuildHeight() - 5 && level.getBlockState(blockpos.above()).canBeReplaced(pContext)) {
-//            return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection());
-//        } else {
-//            return null;
-//        }
-//    }
-
-    // 2. 计算占位方块的实际位置（根据朝向偏移）
+    // 计算占位方块的实际位置（根据朝向偏移）
     private BlockPos getPlaceholderPos(BlockPos centerPos, Direction facing, int xzIndex, int yOffset) {
         int actualXzOffset = getXzOffsetByIndex(xzIndex); // 索引→实际偏移
         return switch (facing) {
@@ -87,7 +71,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         };
     }
 
-    // 3. 放置时生成所有占位方块（效仿灾变setPlacedBy）
+    // 放置时生成所有占位方块
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockPos centerPos = context.getClickedPos();
@@ -99,18 +83,18 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         // 返回中心状态：XZ_INDEX=4（偏移0）
         return this.defaultBlockState()
                 .setValue(FACING, facing)
-                .setValue(XZ_INDEX, 4)
+                .setValue(XZ_INDEX, MIDDLE_XZ_INDEX)
                 .setValue(Y_OFFSET, 0)
                 .setValue(IS_MAIN, true);
     }
-    // 1. 校验所有占位方块位置（修改循环范围）
+    // 校验所有占位方块位置
     private boolean canPlaceAllPlaceholders(BlockPlaceContext context) {
         BlockPos centerPos = context.getClickedPos();
         Direction facing = context.getHorizontalDirection();
         Level level = context.getLevel();
 
-        for (int xzIndex = 0; xzIndex <= 8; xzIndex++) {
-            for (int y = 0; y <= 5; y++) {
+        for (int xzIndex = 0; xzIndex <= MAX_XZ_INDEX; xzIndex++) {
+            for (int y = 0; y <= MAX_Y_OFFSET; y++) {
                 BlockPos placeholderPos = getPlaceholderPos(centerPos, facing, xzIndex, y);
                 if (placeholderPos.getY() > level.getMaxBuildHeight() - 1) return false;
                 if (!level.getBlockState(placeholderPos).canBeReplaced(context)) return false;
@@ -119,7 +103,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         return true;
     }
 
-    // 2. 生成所有占位方块（修改循环范围）
+    // 生成所有占位方块
     @Override
     public void setPlacedBy(Level level, BlockPos centerPos, BlockState centerState, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, centerPos, centerState, placer, stack);
@@ -127,9 +111,9 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
 
         Direction facing = centerState.getValue(FACING);
         // 循环索引 0~9（跳过中心索引4+Y=0）
-        for (int xzIndex = 0; xzIndex <= 8; xzIndex++) {
-            for (int y = 0; y <= 5; y++) {
-                if (xzIndex == 4 && y == 0) continue; // 中心索引4→偏移0，跳过已生成的中心方块
+        for (int xzIndex = 0; xzIndex <= MAX_XZ_INDEX; xzIndex++) {
+            for (int y = 0; y <= MAX_Y_OFFSET; y++) {
+                if (xzIndex == MIDDLE_XZ_INDEX && y == 0) continue; // 中心索引4→偏移0，跳过已生成的中心方块
 
                 BlockPos placeholderPos = getPlaceholderPos(centerPos, facing, xzIndex, y);
                 // 占位方块状态：设置 XZ_INDEX（不是偏移）
@@ -151,12 +135,12 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        // 1. 找到中心方块的BlockEntity（获取门的状态）
+        // 找到中心方块的BlockEntity
         BlockPos centerPos = getCenterPos(state, pos);
         DeepBlueLabAccessControlDoorEntity centerEntity = (DeepBlueLabAccessControlDoorEntity) level.getBlockEntity(centerPos);
         if (centerEntity == null) return BASE_COLLISION_SHAPE;
 
-        // 2. 根据门的状态返回碰撞体积
+        // 根据门的状态返回碰撞体积
         if (centerEntity.getDoorState() == DeepBlueLabAccessControlDoorEntity.DoorState.OPENED) {
             return OPEN_COLLISION_SHAPE; // 开门：薄框不阻挡
         } else {
@@ -164,13 +148,13 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         }
     }
 
-    // 3. 鼠标对准的视觉反馈（让鼠标能选中所有占位方块，效仿灾变的getShape）
+    // 鼠标对准的视觉反馈
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return getCollisionShape(state, level, pos, context);
     }
 
-    // 4. 从任意占位方块找到中心方块（效仿灾变的getBasePos）
+    // 从任意占位方块找到中心方块（
     private BlockPos getCenterPos(BlockState state, BlockPos pos) {
         Direction facing = state.getValue(FACING);
         int xzIndex = state.getValue(XZ_INDEX); // 获取索引
@@ -185,7 +169,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         };
     }
     /*
-        动态生成门的AABB
+        动态生成门的Shape
      */
 //    private VoxelShape getDynamicShape(BlockState state, BlockGetter level, BlockPos pos) {
 //        BlockEntity blockEntity = level.getBlockEntity(pos);
@@ -271,8 +255,8 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         }
 
         // 销毁所有占位方块
-        for (int xz = 0; xz <= 8; xz++) {
-            for (int y = 0; y <= 5; y++) {
+        for (int xz = 0; xz <= MAX_XZ_INDEX; xz++) {
+            for (int y = 0; y <= MAX_Y_OFFSET; y++) {
                 BlockPos placeholderPos = getPlaceholderPos(centerPos, facing, xz, y);
                 if (level.getBlockState(placeholderPos).is(this)) {
                     level.setBlock(placeholderPos, Blocks.AIR.defaultBlockState(), 35);
