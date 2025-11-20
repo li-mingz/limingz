@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class GeckolibInterpolationTool {
     public static class PositionKeyframe {
-        private final double time;       // 关键帧时间（秒）
+        private final double time;       // 关键帧时间
         private final Vector3d vector;   // 位置向量（x,y,z）
         private final EasingType easing; // 缓动类型
 

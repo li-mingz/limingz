@@ -11,6 +11,7 @@ import com.limingz.mymod.mixins_access.AnimationControllerAccess;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPacket;
 import com.limingz.mymod.register.BlockEntityRegister;
+import com.limingz.mymod.util.GeckolibInterpolationTool;
 import com.limingz.mymod.util.PauseTick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.joml.Vector3d;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -75,11 +77,16 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
     private DoorState doorState = DoorState.CLOSED;
     // 当前动画的帧数
     private double animationTick = 0;
+    private double lastAnimationTick = -1;
     // 当前动画的长度
     private double animationLength = 600;  // 30 * 20
 
     // 是否需要加载动画的帧数
     private Boolean needLoadTick = false;
+
+    private double lastCalculatedTick = -1; // 上一次计算的 tick
+    private Vector3d leftDoorPos; // 左门插值后的位置
+    private Vector3d rightDoorPos; // 右门插值后的位置
 
     public DeepBlueLabAccessControlDoorEntity(BlockPos pPos, BlockState pBlockState) {
         super(BlockEntityRegister.deep_blue_lab_access_control_door_entity.get(), pPos, pBlockState);
@@ -373,7 +380,6 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
                 switchDoorState();
             } else {
                 animationTick += 1D;
-                Main.LOGGER.info(String.valueOf(animationTick));
             }
         }
         if(doorState == DoorState.CLOSED){
@@ -393,6 +399,26 @@ public class DeepBlueLabAccessControlDoorEntity extends BlockEntity implements G
             case SOUTH, NORTH -> SOUTH_AND_NORTH_MAX_BOUNDING_BOX;
             default -> new AABB(0, 0, 0, 1, 1, 1);
         };
+    }
+    // 只有 tick 变化时才重新计算，否则返回缓存
+    public void calculateAnimationIfNeeded() {
+        // 同一帧，直接复用缓存
+        if (animationTick == lastCalculatedTick) return;
+
+        // 重新计算插值
+        this.leftDoorPos = GeckolibInterpolationTool.interpolatePosition(DeepBlueLabAccessControlDoor.KEYFRAMES_LEFT, animationTick);
+        this.rightDoorPos = GeckolibInterpolationTool.interpolatePosition(DeepBlueLabAccessControlDoor.KEYFRAMES_RIGHT, animationTick);
+        this.lastCalculatedTick = animationTick; // 更新缓存 tick
+    }
+
+    public Vector3d getLeftDoorPos() {
+        calculateAnimationIfNeeded();
+        return leftDoorPos;
+    }
+
+    public Vector3d getRightDoorPos() {
+        calculateAnimationIfNeeded();
+        return rightDoorPos;
     }
 
 }

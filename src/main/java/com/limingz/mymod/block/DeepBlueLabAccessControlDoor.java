@@ -1,7 +1,9 @@
 package com.limingz.mymod.block;
 
+import com.limingz.mymod.Main;
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
 import com.limingz.mymod.register.BlockEntityRegister;
+import com.limingz.mymod.util.GeckolibInterpolationTool;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +25,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+import software.bernie.geckolib.core.animation.EasingType;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
@@ -42,6 +50,19 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     private static final VoxelShape BASE_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
     // 打开状态：每个占位方块的碰撞体积（薄框，不阻挡）
     private static final VoxelShape OPEN_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+
+    // 关键帧
+    public static final List<GeckolibInterpolationTool.PositionKeyframe> KEYFRAMES_LEFT = List.of(
+            new GeckolibInterpolationTool.PositionKeyframe(0, new Vector3d(0, 0, 0)),
+            new GeckolibInterpolationTool.PositionKeyframe(300, new Vector3d(28, 0, 0), EasingType.EASE_IN_OUT_QUAD),
+            new GeckolibInterpolationTool.PositionKeyframe(600, new Vector3d(0, 0, 0), EasingType.EASE_IN_OUT_QUAD)
+    );
+    public static final List<GeckolibInterpolationTool.PositionKeyframe> KEYFRAMES_RIGHT = List.of(
+            new GeckolibInterpolationTool.PositionKeyframe(0, new Vector3d(0, 0, 0)),
+            new GeckolibInterpolationTool.PositionKeyframe(300, new Vector3d(-28, 0, 0), EasingType.EASE_IN_OUT_QUAD),
+            new GeckolibInterpolationTool.PositionKeyframe(600, new Vector3d(0, 0, 0), EasingType.EASE_IN_OUT_QUAD)
+    );
+
 
 
     public DeepBlueLabAccessControlDoor(Properties pProperties) {
@@ -138,9 +159,10 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         // 找到中心方块的BlockEntity
         BlockPos centerPos = getCenterPos(state, pos);
         DeepBlueLabAccessControlDoorEntity centerEntity = (DeepBlueLabAccessControlDoorEntity) level.getBlockEntity(centerPos);
-        if (centerEntity == null) return BASE_COLLISION_SHAPE;
 
-        // 根据门的状态返回碰撞体积
+        if (centerEntity == null) return BASE_COLLISION_SHAPE;
+        Vector3d leftDoorPosition = centerEntity.getLeftDoorPos();
+        Vector3d rightDoorPosition = centerEntity.getRightDoorPos();
         if (centerEntity.getDoorState() == DeepBlueLabAccessControlDoorEntity.DoorState.OPENED) {
             return OPEN_COLLISION_SHAPE; // 开门：薄框不阻挡
         } else {
