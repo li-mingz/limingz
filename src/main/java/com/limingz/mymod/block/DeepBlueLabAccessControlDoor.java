@@ -45,8 +45,14 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     public static final BooleanProperty IS_MAIN = BooleanProperty.create("is_main");
     // 默认状态: 1格
     private static final VoxelShape BASE_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-    //无体积
-    private static final VoxelShape AIR_SHAPE = Shapes.empty();
+    // 一格墙 North
+    private static final VoxelShape NORTH_WALL_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 5.0D);
+    // 一格墙 South
+    private static final VoxelShape SOUTH_WALL_SHAPE = Block.box(0.0D, 0.0D, 11.0D, 16.0D, 16.0D, 16.0D);
+    // 一格墙 West
+    private static final VoxelShape WEST_WALL_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 5.0D, 16.0D, 16.0D);
+    // 一格墙 East
+    private static final VoxelShape EAST_WALL_SHAPE = Block.box(11.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
     private static final double DOOR_PANEL_WIDE = 40;  // 单个门板的宽度
 
     // 关键帧
@@ -159,14 +165,54 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         DeepBlueLabAccessControlDoorEntity centerEntity = (DeepBlueLabAccessControlDoorEntity) level.getBlockEntity(centerPos);
 
         if (centerEntity == null) return BASE_COLLISION_SHAPE;
-        return getDynamicShape(state, level, pos, centerEntity);
+        Direction facing = state.getValue(FACING); // 获取门的朝向
+        int xz_index = state.getValue(XZ_INDEX); // 获取门方块的横向索引
+        int actualXzOffset = getXzOffsetByIndex(xz_index); // 获取横向索引对应的横向偏移
+        int absActualXzOffset = Math.abs(actualXzOffset);
+        if(absActualXzOffset < 2){
+            return getDynamicShape(facing, actualXzOffset, centerEntity);
+        }
+        // 固定额外半格
+        else if (absActualXzOffset == 2) {
+            switch (facing){
+                case NORTH -> {
+                    return Shapes.or(NORTH_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+                case SOUTH -> {
+                    return Shapes.or(SOUTH_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+                case WEST -> {
+                    return Shapes.or(WEST_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+                case EAST -> {
+                    return Shapes.or(EAST_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+            }
+        }
+        // 固定额外一格
+        else {
+            switch (facing){
+                case NORTH -> {
+                    return Shapes.or(NORTH_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+                case SOUTH -> {
+                    return Shapes.or(SOUTH_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+                case WEST -> {
+                    return Shapes.or(WEST_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+                case EAST -> {
+                    return Shapes.or(EAST_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+                }
+            }
+        }
+        return BASE_COLLISION_SHAPE;
     }
 
     // 鼠标对准的视觉反馈
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        VoxelShape voxelShape = getCollisionShape(state, level, pos, context);
-        return voxelShape;
+        return getCollisionShape(state, level, pos, context);
     }
 
     // 从任意占位方块找到中心方块（
@@ -186,15 +232,12 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     /*
         动态生成门板的VoxelShape(仅门板，不包括墙)
      */
-    private VoxelShape getDynamicShape(BlockState state, BlockGetter level, BlockPos pos, DeepBlueLabAccessControlDoorEntity centerEntity) {
+    private VoxelShape getDynamicShape(Direction facing, int actualXzOffset, DeepBlueLabAccessControlDoorEntity centerEntity) {
         // 计算门的偏移
         Vector3d leftDoorOffset = centerEntity.getLeftDoorPos();  // 左门板的偏移
         Vector3d rightDoorOffset = centerEntity.getRightDoorPos();  // 右门板的偏移
         double left_x_offset = leftDoorOffset.x();
         double right_x_offset = rightDoorOffset.x();
-        Direction facing = state.getValue(FACING); // 获取门的朝向
-        int xz_index = state.getValue(XZ_INDEX); // 获取门方块的横向索引
-        int actualXzOffset = getXzOffsetByIndex(xz_index); // 获取横向索引对应的横向偏移
 
         // 以方块朝向为 North 时为基准，"左侧"指 XZ_INDEX 最小的那侧
         double leftDoorPanelLeftPosition = -left_x_offset - DOOR_PANEL_WIDE;  // 左门板的左侧边界
