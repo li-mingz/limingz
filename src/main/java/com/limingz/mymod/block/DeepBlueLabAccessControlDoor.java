@@ -166,7 +166,6 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelShape voxelShape = getCollisionShape(state, level, pos, context);
-        Main.LOGGER.info(voxelShape.toString());
         return voxelShape;
     }
 
@@ -185,7 +184,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         };
     }
     /*
-        动态生成门的VoxelShape
+        动态生成门板的VoxelShape(仅门板，不包括墙)
      */
     private VoxelShape getDynamicShape(BlockState state, BlockGetter level, BlockPos pos, DeepBlueLabAccessControlDoorEntity centerEntity) {
         // 计算门的偏移
@@ -212,34 +211,38 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
             double rightPosition = Math.min(16.0D, 8.0D - right_x_position);
             switch (facing){
                 case NORTH, SOUTH -> {
-                    return Shapes.or(Block.box(0.0D, 0.0D, 0.0D, leftPosition, 16.0D, 16.0D),
-                            Block.box(rightPosition, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D));
+                    return Shapes.or(Block.box(0.0D, 0.0D, 5.0D, leftPosition, 16.0D, 11.0D),
+                            Block.box(rightPosition, 0.0D, 5.0D, 16.0D, 16.0D, 11.0D));
                 }
                 case EAST, WEST -> {
-                    return Shapes.or(Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, leftPosition),
-                            Block.box(0.0D, 0.0D, rightPosition, 16.0D, 16.0D, 16.0D));
+                    return Shapes.or(Block.box(5.0D, 0.0D, 0.0D, 11.0D, 16.0D, leftPosition),
+                            Block.box(5.0D, 0.0D, rightPosition, 11.0D, 16.0D, 16.0D));
                 }
             }
         } else if (actualXzOffset < 0) {
-            double leftPosition = Math.min(16.0D,
+            double rightPosition = Math.min(16.0D,
                     Math.max(0.0D, 16.0D * (Math.abs(actualXzOffset)+1) - left_x_position - 8.0D));
+            double leftPosition = Math.min(16.0D,
+                    Math.max(0.0D, 16.0D * (Math.abs(actualXzOffset)-2) - left_x_position));
             switch (facing){
                 case NORTH, SOUTH -> {
-                    return Block.box(0.0D, 0.0D, 0.0D, leftPosition, 16.0D, 16.0D);
+                    return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
                 }
                 case EAST, WEST -> {
-                    return Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, leftPosition);
+                    return Block.box(5.0D, 0.0D, leftPosition, 11.0D, 16.0D, rightPosition);
                 }
             }
         } else {
-            double rightPosition = Math.min(16.0D,
+            double leftPosition = Math.min(16.0D,
                     Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)-1) - right_x_position - 8.0D));
+            double rightPosition = Math.min(16.0D,
+                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)+2) - right_x_position));
             switch (facing){
                 case NORTH, SOUTH -> {
-                    return Block.box(rightPosition, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+                    return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
                 }
                 case EAST, WEST -> {
-                    return Block.box(0.0D, 0.0D, rightPosition, 16.0D, 16.0D, 16.0D);
+                    return Block.box(5.0D, 0.0D, leftPosition, 11.0D, 16.0D, rightPosition);
                 }
             }
         }
