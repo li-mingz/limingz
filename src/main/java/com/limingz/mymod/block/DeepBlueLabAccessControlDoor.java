@@ -53,6 +53,27 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     private static final VoxelShape WEST_WALL_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 5.0D, 16.0D, 16.0D);
     // 一格墙 East
     private static final VoxelShape EAST_WALL_SHAPE = Block.box(11.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+
+    // 半格墙 North 左
+    private static final VoxelShape NORTH_HALF_WALL_SHAPE_LEFT = Block.box(0.0D, 0.0D, 0.0D, 8.0D, 16.0D, 5.0D);
+    // 半格墙 South 左
+    private static final VoxelShape SOUTH_HALF_WALL_SHAPE_LEFT = Block.box(0.0D, 0.0D, 11.0D, 8.0D, 16.0D, 16.0D);
+    // 半格墙 West 左
+    private static final VoxelShape WEST_HALF_WALL_SHAPE_LEFT = Block.box(0.0D, 0.0D, 0.0D, 5.0D, 16.0D, 8.0D);
+    // 半格墙 East 左
+    private static final VoxelShape EAST_HALF_WALL_SHAPE_LEFT = Block.box(11.0D, 0.0D, 0.0D, 16.0D, 16.0D, 8.0D);
+
+    // 半格墙 North 右
+    private static final VoxelShape NORTH_HALF_WALL_SHAPE_RIGHT = Block.box(8.0D, 0.0D, 0.0D, 16.0D, 16.0D, 5.0D);
+    // 半格墙 South 右
+    private static final VoxelShape SOUTH_HALF_WALL_SHAPE_RIGHT = Block.box(8.0D, 0.0D, 11.0D, 16.0D, 16.0D, 16.0D);
+    // 半格墙 West 右
+    private static final VoxelShape WEST_HALF_WALL_SHAPE_RIGHT = Block.box(0.0D, 0.0D, 8.0D, 5.0D, 16.0D, 16.0D);
+    // 半格墙 East 右
+    private static final VoxelShape EAST_HALF_WALL_SHAPE_RIGHT = Block.box(11.0D, 0.0D, 8.0D, 16.0D, 16.0D, 16.0D);
+
+
+
     private static final double DOOR_PANEL_WIDE = 40;  // 单个门板的宽度
 
     // 关键帧
@@ -174,18 +195,35 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         }
         // 固定额外半格
         else if (absActualXzOffset == 2) {
-            switch (facing){
-                case NORTH -> {
-                    return Shapes.or(NORTH_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+            if(actualXzOffset < 0){
+                switch (facing){
+                    case NORTH -> {
+                        return Shapes.or(NORTH_HALF_WALL_SHAPE_LEFT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
+                    case SOUTH -> {
+                        return Shapes.or(SOUTH_HALF_WALL_SHAPE_LEFT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
+                    case WEST -> {
+                        return Shapes.or(WEST_HALF_WALL_SHAPE_LEFT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
+                    case EAST -> {
+                        return Shapes.or(EAST_HALF_WALL_SHAPE_LEFT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
                 }
-                case SOUTH -> {
-                    return Shapes.or(SOUTH_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
-                }
-                case WEST -> {
-                    return Shapes.or(WEST_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
-                }
-                case EAST -> {
-                    return Shapes.or(EAST_WALL_SHAPE, getDynamicShape(facing, actualXzOffset, centerEntity));
+            } else {
+                switch (facing){
+                    case NORTH -> {
+                        return Shapes.or(NORTH_HALF_WALL_SHAPE_RIGHT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
+                    case SOUTH -> {
+                        return Shapes.or(SOUTH_HALF_WALL_SHAPE_RIGHT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
+                    case WEST -> {
+                        return Shapes.or(WEST_HALF_WALL_SHAPE_RIGHT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
+                    case EAST -> {
+                        return Shapes.or(EAST_HALF_WALL_SHAPE_RIGHT, getDynamicShape(facing, actualXzOffset, centerEntity));
+                    }
                 }
             }
         }
