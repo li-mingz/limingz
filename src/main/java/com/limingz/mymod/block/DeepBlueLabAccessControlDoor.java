@@ -28,9 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import software.bernie.geckolib.core.animation.EasingType;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
@@ -46,10 +44,10 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     public static final IntegerProperty Y_OFFSET = IntegerProperty.create("y_offset", 0, MAX_Y_OFFSET);
     // 是否是中心方块（负责渲染和逻辑）
     public static final BooleanProperty IS_MAIN = BooleanProperty.create("is_main");
-    // 闭合状态：每个占位方块的碰撞体积（1×1×1基础框，拼接成完整门碰撞）
+    // 默认状态: 1格
     private static final VoxelShape BASE_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-    // 打开状态：每个占位方块的碰撞体积（薄框，不阻挡）
-    private static final VoxelShape OPEN_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+    //无体积
+    private static final VoxelShape AIR_SHAPE = Shapes.empty();
 
     // 关键帧
     public static final List<GeckolibInterpolationTool.PositionKeyframe> KEYFRAMES_LEFT = List.of(
@@ -161,19 +159,15 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         DeepBlueLabAccessControlDoorEntity centerEntity = (DeepBlueLabAccessControlDoorEntity) level.getBlockEntity(centerPos);
 
         if (centerEntity == null) return BASE_COLLISION_SHAPE;
-        Vector3d leftDoorPosition = centerEntity.getLeftDoorPos();
-        Vector3d rightDoorPosition = centerEntity.getRightDoorPos();
-        if (centerEntity.getDoorState() == DeepBlueLabAccessControlDoorEntity.DoorState.OPENED) {
-            return OPEN_COLLISION_SHAPE; // 开门：薄框不阻挡
-        } else {
-            return BASE_COLLISION_SHAPE; // 关门：完整1×1碰撞，拼接成整个门的碰撞框
-        }
+        return getDynamicShape(state, level, pos, centerEntity);
     }
 
     // 鼠标对准的视觉反馈
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return getCollisionShape(state, level, pos, context);
+        VoxelShape voxelShape = getCollisionShape(state, level, pos, context);
+        Main.LOGGER.info(voxelShape.toString());
+        return voxelShape;
     }
 
     // 从任意占位方块找到中心方块（
@@ -191,39 +185,67 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         };
     }
     /*
-        动态生成门的Shape
+        动态生成门的VoxelShape
      */
-//    private VoxelShape getDynamicShape(BlockState state, BlockGetter level, BlockPos pos) {
-//        BlockEntity blockEntity = level.getBlockEntity(pos);
-//        if (!(blockEntity instanceof DeepBlueLabAccessControlDoorEntity doorEntity)) {
-//            return CLOSED_SHAPE; // 无 BlockEntity 时默认关闭形状
+    private VoxelShape getDynamicShape(BlockState state, BlockGetter level, BlockPos pos, DeepBlueLabAccessControlDoorEntity centerEntity) {
+        // 计算门的偏移
+        Vector3d leftDoorPosition = centerEntity.getLeftDoorPos();
+        Vector3d rightDoorPosition = centerEntity.getRightDoorPos();
+        double left_x_position = leftDoorPosition.x();
+        double right_x_position = rightDoorPosition.x();
+
+        Direction facing = state.getValue(FACING); // 获取门的朝向
+        int xz_index = state.getValue(XZ_INDEX); // 获取门方块的横向索引
+        int actualXzOffset = getXzOffsetByIndex(xz_index); // 获取横向索引对应的横向偏移
+
+        // 以北朝向为基准(门朝北时方块索引从左往右递增)
+//        int leftOrRightOffset;
+//        switch (facing){
+//            case NORTH -> leftOrRightOffset = actualXzOffset;
+//            case SOUTH -> leftOrRightOffset = -actualXzOffset;
+//            default -> leftOrRightOffset = actualXzOffset;
 //        }
-//
-//        Direction facing = state.getValue(FACING); // 获取门的朝向
-//        DeepBlueLabAccessControlDoorEntity.DoorState doorState = doorEntity.getDoorState();
-//        double animationTick = doorEntity.getAnimationTick();
-//        double animationHalfLength = doorEntity.getAnimationLength() / 2; // 开门动画长度（0~300）
-//
-//        switch (doorState) {
-//            case OPENED:
-//                // 打开状态：薄型碰撞箱（沿朝向轴收缩）
-//                return getOpenedShape(facing);
-//            case OPENING:
-//                // 开门中：根据动画进度平滑过渡（从完整→薄）
-//                float openProgress = (float) (animationTick / animationHalfLength);
-//                openProgress = Math.min(openProgress, 1.0F); // 防止进度溢出
-//                return getTransitionShape(facing, openProgress, true);
-//            case CLOSING:
-//                // 关门中：根据动画进度平滑过渡（从薄→完整）
-//                float closeProgress = (float) ((animationTick - animationHalfLength) / animationHalfLength);
-//                closeProgress = Math.min(closeProgress, 1.0F);
-//                return getTransitionShape(facing, closeProgress, false);
-//            case CLOSED:
-//            default:
-//                // 关闭状态：完整碰撞箱
-//                return CLOSED_SHAPE;
-//        }
-//    }
+
+        if(actualXzOffset == 0){
+            // 为中间一列
+            double leftPosition = Math.max(0.0D, 8.0D - left_x_position);
+            double rightPosition = Math.min(16.0D, 8.0D - right_x_position);
+            switch (facing){
+                case NORTH, SOUTH -> {
+                    return Shapes.or(Block.box(0.0D, 0.0D, 0.0D, leftPosition, 16.0D, 16.0D),
+                            Block.box(rightPosition, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D));
+                }
+                case EAST, WEST -> {
+                    return Shapes.or(Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, leftPosition),
+                            Block.box(0.0D, 0.0D, rightPosition, 16.0D, 16.0D, 16.0D));
+                }
+            }
+        } else if (actualXzOffset < 0) {
+            double leftPosition = Math.min(16.0D,
+                    Math.max(0.0D, 16.0D * (Math.abs(actualXzOffset)+1) - left_x_position - 8.0D));
+            switch (facing){
+                case NORTH, SOUTH -> {
+                    return Block.box(0.0D, 0.0D, 0.0D, leftPosition, 16.0D, 16.0D);
+                }
+                case EAST, WEST -> {
+                    return Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, leftPosition);
+                }
+            }
+        } else {
+            double rightPosition = Math.min(16.0D,
+                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)-1) - right_x_position - 8.0D));
+            switch (facing){
+                case NORTH, SOUTH -> {
+                    return Block.box(rightPosition, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+                }
+                case EAST, WEST -> {
+                    return Block.box(0.0D, 0.0D, rightPosition, 16.0D, 16.0D, 16.0D);
+                }
+            }
+        }
+        return BASE_COLLISION_SHAPE;
+    }
+
     @Override
     public RenderShape getRenderShape(BlockState state) {
         // 只有中心方块渲染Geckolib模型，其他隐藏
