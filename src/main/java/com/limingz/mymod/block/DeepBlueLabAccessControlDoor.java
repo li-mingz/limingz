@@ -48,6 +48,7 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     private static final VoxelShape BASE_COLLISION_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
     //无体积
     private static final VoxelShape AIR_SHAPE = Shapes.empty();
+    private static final double DOOR_PANEL_WIDE = 40;  // 单个门板的宽度
 
     // 关键帧
     public static final List<GeckolibInterpolationTool.PositionKeyframe> KEYFRAMES_LEFT = List.of(
@@ -188,27 +189,32 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
      */
     private VoxelShape getDynamicShape(BlockState state, BlockGetter level, BlockPos pos, DeepBlueLabAccessControlDoorEntity centerEntity) {
         // 计算门的偏移
-        Vector3d leftDoorPosition = centerEntity.getLeftDoorPos();
-        Vector3d rightDoorPosition = centerEntity.getRightDoorPos();
-        double left_x_position = leftDoorPosition.x();
-        double right_x_position = rightDoorPosition.x();
+        Vector3d leftDoorOffset = centerEntity.getLeftDoorPos();  // 左门板的偏移
+        Vector3d rightDoorOffset = centerEntity.getRightDoorPos();  // 右门板的偏移
+        double left_x_offset = leftDoorOffset.x();
+        double right_x_offset = rightDoorOffset.x();
 
         Direction facing = state.getValue(FACING); // 获取门的朝向
         int xz_index = state.getValue(XZ_INDEX); // 获取门方块的横向索引
         int actualXzOffset = getXzOffsetByIndex(xz_index); // 获取横向索引对应的横向偏移
 
-        // 以北朝向为基准(门朝北时方块索引从左往右递增)
-//        int leftOrRightOffset;
-//        switch (facing){
-//            case NORTH -> leftOrRightOffset = actualXzOffset;
-//            case SOUTH -> leftOrRightOffset = -actualXzOffset;
-//            default -> leftOrRightOffset = actualXzOffset;
-//        }
+        // 以方块朝向为 North 时为基准，"左侧"指 XZ_INDEX 最小的那侧
+        double leftDoorPanelLeftPosition = -left_x_offset - DOOR_PANEL_WIDE;  // 左门板的左侧边界
+        double leftDoorPanelRightPosition = -left_x_offset; // 左门板的右侧边界
+        double rightDoorPanelLeftPosition = -right_x_offset;  // 右门板的左侧边界
+        double rightDoorPanelRightPosition = -right_x_offset + DOOR_PANEL_WIDE;  // 右门板的右侧边界
+
+        // 中间的方块独自计算, 不计入边界范围
+        // 门框的范围整体往中间移半格以方便计算
+        leftDoorPanelLeftPosition += 8.0D;
+        leftDoorPanelRightPosition += 8.0D;
+        rightDoorPanelLeftPosition -= 8.0D;
+        rightDoorPanelRightPosition -= 8.0D;
 
         if(actualXzOffset == 0){
             // 为中间一列
-            double leftPosition = Math.max(0.0D, 8.0D - left_x_position);
-            double rightPosition = Math.min(16.0D, 8.0D - right_x_position);
+            double leftPosition = Math.max(0.0D, 8.0D - left_x_offset);
+            double rightPosition = Math.min(16.0D, 8.0D - right_x_offset);
             switch (facing){
                 case NORTH, SOUTH -> {
                     return Shapes.or(Block.box(0.0D, 0.0D, 5.0D, leftPosition, 16.0D, 11.0D),
@@ -220,10 +226,23 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
                 }
             }
         } else if (actualXzOffset < 0) {
-            double rightPosition = Math.min(16.0D,
-                    Math.max(0.0D, 16.0D * (Math.abs(actualXzOffset)+1) - left_x_position - 8.0D));
-            double leftPosition = Math.min(16.0D,
-                    Math.max(0.0D, 16.0D * (Math.abs(actualXzOffset)-2) - left_x_position));
+            double leftPosition = 0;
+            double rightPosition = 16;
+            // 4种情况
+            // 方块不与边界相交且方块不在边界内
+            if(leftDoorPanelLeftPosition / 16 - 1 > actualXzOffset || leftDoorPanelRightPosition / 16 < actualXzOffset){
+                rightPosition = 0;
+            } else {
+                if(leftDoorPanelLeftPosition / 16 > actualXzOffset && leftDoorPanelLeftPosition / 16 < actualXzOffset + 1){
+                    // 左边界在方块内
+                    leftPosition = 16 + (leftDoorPanelLeftPosition % 16);
+                } else if (leftDoorPanelRightPosition / 16 > actualXzOffset && leftDoorPanelRightPosition / 16 < actualXzOffset + 1) {
+                    // 右边界在方块内
+                    rightPosition = 16 + (leftDoorPanelRightPosition % 16);
+                }
+                // 都没有说明边界不在方块内
+            }
+
             switch (facing){
                 case NORTH, SOUTH -> {
                     return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
@@ -233,18 +252,18 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
                 }
             }
         } else {
-            double leftPosition = Math.min(16.0D,
-                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)-1) - right_x_position - 8.0D));
-            double rightPosition = Math.min(16.0D,
-                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)+2) - right_x_position));
-            switch (facing){
-                case NORTH, SOUTH -> {
-                    return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
-                }
-                case EAST, WEST -> {
-                    return Block.box(5.0D, 0.0D, leftPosition, 11.0D, 16.0D, rightPosition);
-                }
-            }
+//            double leftPosition = Math.min(16.0D,
+//                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)-1) - right_x_position - 8.0D));
+//            double rightPosition = Math.min(16.0D,
+//                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)+1) - right_x_position));
+//            switch (facing){
+//                case NORTH, SOUTH -> {
+//                    return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
+//                }
+//                case EAST, WEST -> {
+//                    return Block.box(5.0D, 0.0D, leftPosition, 11.0D, 16.0D, rightPosition);
+//                }
+//            }
         }
         return BASE_COLLISION_SHAPE;
     }
