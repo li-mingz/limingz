@@ -1,6 +1,5 @@
 package com.limingz.mymod.block;
 
-import com.limingz.mymod.Main;
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
 import com.limingz.mymod.register.BlockEntityRegister;
 import com.limingz.mymod.util.GeckolibInterpolationTool;
@@ -193,7 +192,6 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
         Vector3d rightDoorOffset = centerEntity.getRightDoorPos();  // 右门板的偏移
         double left_x_offset = leftDoorOffset.x();
         double right_x_offset = rightDoorOffset.x();
-
         Direction facing = state.getValue(FACING); // 获取门的朝向
         int xz_index = state.getValue(XZ_INDEX); // 获取门方块的横向索引
         int actualXzOffset = getXzOffsetByIndex(xz_index); // 获取横向索引对应的横向偏移
@@ -229,15 +227,16 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
             double leftPosition = 0;
             double rightPosition = 16;
             // 4种情况
-            // 方块不与边界相交且方块不在边界内
-            if(leftDoorPanelLeftPosition / 16 - 1 > actualXzOffset || leftDoorPanelRightPosition / 16 < actualXzOffset){
+            // 方块不与边界相交且方块不在边界内 (actualXzOffset + 1 ~ actualXzOffset)为该方块的区间(actualXzOffset <= -1)
+            if(leftDoorPanelLeftPosition / 16 > actualXzOffset + 1 || leftDoorPanelRightPosition / 16 < actualXzOffset){
                 rightPosition = 0;
             } else {
-                if(leftDoorPanelLeftPosition / 16 > actualXzOffset && leftDoorPanelLeftPosition / 16 < actualXzOffset + 1){
-                    // 左边界在方块内
+                // 左边界在方块内
+                if(leftDoorPanelLeftPosition / 16 > actualXzOffset && leftDoorPanelLeftPosition / 16 <= actualXzOffset + 1){
                     leftPosition = 16 + (leftDoorPanelLeftPosition % 16);
-                } else if (leftDoorPanelRightPosition / 16 > actualXzOffset && leftDoorPanelRightPosition / 16 < actualXzOffset + 1) {
-                    // 右边界在方块内
+                }
+                // 右边界在方块内
+                else if (leftDoorPanelRightPosition / 16 > actualXzOffset && leftDoorPanelRightPosition / 16 <= actualXzOffset + 1) {
                     rightPosition = 16 + (leftDoorPanelRightPosition % 16);
                 }
                 // 都没有说明边界不在方块内
@@ -252,18 +251,30 @@ public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
                 }
             }
         } else {
-//            double leftPosition = Math.min(16.0D,
-//                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)-1) - right_x_position - 8.0D));
-//            double rightPosition = Math.min(16.0D,
-//                    Math.max(0.0D, -16.0D * (Math.abs(actualXzOffset)+1) - right_x_position));
-//            switch (facing){
-//                case NORTH, SOUTH -> {
-//                    return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
-//                }
-//                case EAST, WEST -> {
-//                    return Block.box(5.0D, 0.0D, leftPosition, 11.0D, 16.0D, rightPosition);
-//                }
-//            }
+            double leftPosition = 0;
+            double rightPosition = 16;
+            // 4种情况
+            // 方块不与边界相交且方块不在边界内 (actualXzOffset - 1 ~ actualXzOffset)为该方块的区间(actualXzOffset >= 1)
+            if (rightDoorPanelLeftPosition / 16 > actualXzOffset || rightDoorPanelRightPosition / 16 < actualXzOffset - 1) {
+                rightPosition = 0;
+            } else {
+                // 左边界在方块内
+                if (rightDoorPanelLeftPosition / 16 >= actualXzOffset - 1 && rightDoorPanelLeftPosition / 16 < actualXzOffset) {
+                    leftPosition = (rightDoorPanelLeftPosition % 16);
+                }
+                // 右边界在方块内
+                else if (rightDoorPanelRightPosition / 16 >= actualXzOffset - 1 && rightDoorPanelRightPosition / 16 < actualXzOffset) {
+                    rightPosition = (rightDoorPanelRightPosition % 16);
+                }
+            }
+            switch (facing) {
+                case NORTH, SOUTH -> {
+                    return Block.box(leftPosition, 0.0D, 5.0D, rightPosition, 16.0D, 11.0D);
+                }
+                case EAST, WEST -> {
+                    return Block.box(5.0D, 0.0D, leftPosition, 11.0D, 16.0D, rightPosition);
+                }
+            }
         }
         return BASE_COLLISION_SHAPE;
     }
