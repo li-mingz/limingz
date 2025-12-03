@@ -29,7 +29,11 @@ import software.bernie.geckolib.core.animation.EasingType;
 
 import java.util.List;
 
-
+/*
+    深蓝实验室大门
+    部分方块逻辑参考 灾变 -- 封印之门
+    https://github.com/lender544/new1.20.1/blob/master/src/main/java/com/github/L_Ender/cataclysm/blocks/Door_of_Seal_Block.java
+ */
 public class DeepBlueLabAccessControlDoor extends BaseEntityBlock{
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final int MAX_XZ_INDEX = 8;
