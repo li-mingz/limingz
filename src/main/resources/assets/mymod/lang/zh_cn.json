@@ -5,5 +5,7 @@
   "block.mymod.desk_block": "展示台",
   "block.mymod.demo_block": "3d测试",
   "block.mymod.deep_blue_lab_access_control_door": "“深蓝” 实验室大门",
-  "container.desk_block": "展示台"
+  "container.desk_block": "展示台",
+  "key.categories.mymod": "My Mod",
+  "key.mymod.toggle_overlay": "切换区块覆盖显示"
 }

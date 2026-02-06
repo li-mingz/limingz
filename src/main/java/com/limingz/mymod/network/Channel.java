@@ -1,5 +1,7 @@
 package com.limingz.mymod.network;
 
+import com.limingz.mymod.network.packet.playertoserver.RequestChunkCapturePacket;
+import com.limingz.mymod.network.packet.servertoplayer.ChunkDataPacket;
 import com.limingz.mymod.network.packet.servertoplayer.FarmXpPacket;
 import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPacket;
 import net.minecraft.core.BlockPos;
@@ -33,6 +35,18 @@ public class Channel {
                 .decoder(ServerToClientDoorTickPacket::decode)
                 .encoder(ServerToClientDoorTickPacket::encode)
                 .consumerMainThread(ServerToClientDoorTickPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RequestChunkCapturePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .decoder(RequestChunkCapturePacket::new)
+                .encoder(RequestChunkCapturePacket::encode)
+                .consumerMainThread(RequestChunkCapturePacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ChunkDataPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ChunkDataPacket::new)
+                .encoder(ChunkDataPacket::encode)
+                .consumerMainThread(ChunkDataPacket::handle)
                 .add();
     }
 

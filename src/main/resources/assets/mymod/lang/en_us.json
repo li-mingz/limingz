@@ -2,5 +2,7 @@
   "block.mymod.myblock": "My Block",
   "item.mymod.ticket": "Ticket",
   "mymod": "mymod",
-  "container.desk_block": "展示台"
+  "container.desk_block": "展示台",
+  "key.categories.mymod": "My Mod",
+  "key.mymod.toggle_overlay": "Toggle Chunk Overlay"
 }
