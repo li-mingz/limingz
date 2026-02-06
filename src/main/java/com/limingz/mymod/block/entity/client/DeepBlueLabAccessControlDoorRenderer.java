@@ -3,6 +3,8 @@ package com.limingz.mymod.block.entity.client;
 import com.limingz.mymod.block.entity.DeepBlueLabAccessControlDoorEntity;
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.AnimatedPng;
 import com.limingz.mymod.gui.holographic_ui.renderer.ui.system.PNG;
+import com.limingz.mymod.renderer.util.ModRenderTypes;
+import com.limingz.mymod.renderer.util.SpiralStrand;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -10,8 +12,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
+
+import java.util.Objects;
 
 public class DeepBlueLabAccessControlDoorRenderer extends GeoBlockRenderer<DeepBlueLabAccessControlDoorEntity> {
     private AnimatedPng aside_closeAnimatedPng;
@@ -73,6 +78,46 @@ public class DeepBlueLabAccessControlDoorRenderer extends GeoBlockRenderer<DeepB
         // 前移0.1格
         poseStack.translate(0, 0, 0.1);
         centerAnimatedPng.renderAll(bufferSource, poseStack, packedOverlay, animatable);
+        poseStack.popPose();
+
+        // 螺旋线段渲染
+        // 自定义 RenderType 获取顶点消费者
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(ModRenderTypes.SPIRAL_STRAND);
+        poseStack.pushPose();
+        // 上移3格
+        poseStack.translate(0, 3, 0);
+        // 前移0.3格
+        poseStack.translate(0, 0, 0.3);
+        // 旋转到水平
+        poseStack.mulPose(new Quaternionf().rotateZ((float)Math.toRadians(90)));
+        // 随时间旋转
+        float time = (float) Objects.requireNonNull(animatable.getLevel()).getGameTime() + partialTick;
+        // 旋转速度
+        float twistSpeed = 0.05f;
+
+        // 移动原点到线段底部，使Y轴旋转就是绕线段自身旋转
+        poseStack.translate(0.0D, -SpiralStrand.CACHE_LENGTH / 2.0f, 0.0D);
+        // 线段颜色
+        int color = 0xFF3CACF0;
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        int a = (color >> 24) & 0xFF;
+        // 旋转角度
+        float rotationAngle = time * twistSpeed;
+
+        // 渲染实线
+        poseStack.pushPose();
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotation(rotationAngle));
+        SpiralStrand.renderSolid(poseStack, vertexConsumer, r, g, b, a);
+        poseStack.popPose();
+
+        // 渲染虚线
+        poseStack.pushPose();
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotation(rotationAngle + (float)Math.PI));
+        SpiralStrand.renderDotted(poseStack, vertexConsumer, r, g, b, a);
+        poseStack.popPose();
+
         poseStack.popPose();
     }
 }
