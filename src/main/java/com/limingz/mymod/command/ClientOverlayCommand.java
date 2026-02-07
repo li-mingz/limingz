@@ -1,6 +1,7 @@
 package com.limingz.mymod.command;
 
 import com.limingz.mymod.client.ChunkOverlayManager;
+import com.limingz.mymod.client.ChunkOverlayRenderer;
 import com.limingz.mymod.network.Channel;
 import com.limingz.mymod.network.packet.playertoserver.RequestChunkCapturePacket;
 import com.mojang.brigadier.CommandDispatcher;
@@ -39,10 +40,13 @@ public class ClientOverlayCommand {
             .then(Commands.literal("clear")
                 .executes(ctx -> {
                     ChunkOverlayManager.setEnabled(false);
-                    // Force clear by toggling or we can add a clear method
-                    // But setEnabled(false) already clears buffer in Renderer logic?
-                    // ChunkOverlayManager.setEnabled also clears map if implemented that way.
-                    // Let's check ChunkOverlayManager implementation.
+                    return 1;
+                })
+            )
+            .then(Commands.literal("transition")
+                .executes(ctx -> {
+                    ChunkOverlayRenderer.startAnimation();
+                    ctx.getSource().sendSuccess(() -> Component.literal("Starting dimension transition effect..."), false);
                     return 1;
                 })
             )
@@ -55,6 +59,10 @@ public class ClientOverlayCommand {
 
         ChunkPos target = (pos == null) ? mc.player.chunkPosition() : pos;
 
+        // Sync radius with client render distance
+        int viewDistance = mc.options.renderDistance().get();
+        ChunkOverlayManager.setRadius(viewDistance);
+
         // Send packet to server to request data
         Channel.INSTANCE.sendToServer(new RequestChunkCapturePacket(target, ChunkOverlayManager.getRadius(), dimension));
 
@@ -64,6 +72,11 @@ public class ClientOverlayCommand {
         // Auto-enable when capturing (data will arrive async)
         ChunkOverlayManager.setEnabled(true);
         ChunkOverlayManager.setAnchorChunk(mc.player.chunkPosition());
+        ChunkOverlayManager.setAnchorDimension(mc.level.dimension());
+        ChunkOverlayManager.setTargetDimension(dimension); // Store invalidation
+
+        // Reset animation state to ensure overlay starts hidden
+        ChunkOverlayRenderer.resetState();
 
         return 1;
     }

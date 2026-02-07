@@ -9,7 +9,8 @@
     "StateHolderMixinAccess",
     "recipe.AbstractCookingRecipeMixin",
     "recipe.ShapedRecipeMixin",
-    "recipe.SingleItemRecipeMixin"
+    "recipe.SingleItemRecipeMixin",
+    "MinecraftMixin"
   ],
   "client": [
   ],

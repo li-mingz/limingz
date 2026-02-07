@@ -34,5 +34,10 @@ public class ClientModEventSubscriber {
                 ResourceLocation.fromNamespaceAndPath(Main.MODID, "hologram"),
                 DefaultVertexFormat.BLOCK
         ), shaderInstance -> ChunkOverlayShaderManager.setHologramShader(shaderInstance));
+        event.registerShader(new net.minecraft.client.renderer.ShaderInstance(
+                event.getResourceProvider(),
+                ResourceLocation.fromNamespaceAndPath(Main.MODID, "transition_overlay"),
+                DefaultVertexFormat.BLOCK
+        ), shaderInstance -> ChunkOverlayShaderManager.setTransitionShader(shaderInstance));
     }
 }

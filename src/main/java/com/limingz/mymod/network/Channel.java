@@ -1,6 +1,7 @@
 package com.limingz.mymod.network;
 
 import com.limingz.mymod.network.packet.playertoserver.RequestChunkCapturePacket;
+import com.limingz.mymod.network.packet.playertoserver.RequestTeleportPacket;
 import com.limingz.mymod.network.packet.servertoplayer.ChunkDataPacket;
 import com.limingz.mymod.network.packet.servertoplayer.FarmXpPacket;
 import com.limingz.mymod.network.packet.servertoplayer.ServerToClientDoorTickPacket;
@@ -47,6 +48,12 @@ public class Channel {
                 .decoder(ChunkDataPacket::new)
                 .encoder(ChunkDataPacket::encode)
                 .consumerMainThread(ChunkDataPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RequestTeleportPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .decoder(RequestTeleportPacket::new)
+                .encoder(RequestTeleportPacket::encode)
+                .consumerMainThread(RequestTeleportPacket::handle)
                 .add();
     }
 

@@ -81,7 +81,7 @@ public class RequestChunkCapturePacket {
 
             // Security check? maybe op only if accessing other dimensions or large radius?
             // For now assume strictly visual and harmless, but large radius causes lag.
-            int r = Math.min(this.radius, 2); // Cap at 2 on server side
+            int r = Math.min(this.radius, 32); // Cap at 32 (typical max render distance) on server side
 
             Map<BlockPos, Integer> blockData = new HashMap<>(); // Store state IDs
             Map<BlockPos, Byte> lightMap = new HashMap<>(); // Store light data
@@ -123,6 +123,26 @@ public class RequestChunkCapturePacket {
                                         int wx = cx * 16 + lx;
                                         int wy = sectionY + ly;
                                         int wz = cz * 16 + lz;
+                                        BlockPos absPos = new BlockPos(wx, wy, wz);
+
+                                        // Server-side Culling: Skip completely hidden blocks
+                                        // If a block is solid and opaque, and surrounded by 6 solid opaque blocks, we don't need to render it.
+                                        if (state.canOcclude()) {
+                                            boolean hidden = true;
+                                            for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
+                                                BlockPos neighborPos = absPos.relative(dir);
+                                                // We must check the actual world state, or neighbor section state
+                                                // Using level.getBlockState is safe as chunks are loaded.
+                                                // Optimization: Check section bounds first?
+                                                // Actually getBlockState is fast enough on loaded chunks.
+                                                BlockState neighbor = level.getBlockState(neighborPos);
+                                                if (!neighbor.canOcclude()) {
+                                                    hidden = false;
+                                                    break;
+                                                }
+                                            }
+                                            if (hidden) continue;
+                                        }
 
                                         // Relative to center chunk
                                         // RelX = wx - target.x*16
